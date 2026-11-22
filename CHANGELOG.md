@@ -12,3 +12,6 @@
 
 ## 0.3.1 - 2026-11-22
 - Rock collision fixed (rocks were non-solid), runtime navmesh + NavigationAgent3D enemy pathing, pause menu; 62 tests.
+
+## 0.4.0 - 2026-11-22
+- Visual overhaul: procedural terrain, forest, grass, cinematic environment; navmesh from terrain with rock carving.

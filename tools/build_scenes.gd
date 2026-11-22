@@ -205,31 +205,19 @@ func _build_hud() -> void:
 func _build_arena() -> void:
 	var a := ArenaNav.new()
 	a.name = "TestArena"
-	# Floor
-	var floor_body := StaticBody3D.new(); floor_body.name = "Floor"; floor_body.collision_layer = 1
-	var fs := CollisionShape3D.new(); var fb := BoxShape3D.new(); fb.size = Vector3(80, 1, 80); fs.shape = fb
-	fs.position.y = -0.5
-	floor_body.add_child(fs)
-	var fm := MeshInstance3D.new(); var pm := PlaneMesh.new(); pm.size = Vector2(80, 80)
-	var gm := StandardMaterial3D.new()
-	gm.albedo_texture = load("res://assets/environments/terrain3d_demo/textures/ground037_alb_ht.png")
-	gm.normal_enabled = true
-	gm.normal_texture = load("res://assets/environments/terrain3d_demo/textures/ground037_nrm_rgh.png")
-	gm.uv1_scale = Vector3(16, 16, 1)
-	gm.albedo_color = Color(0.5, 0.6, 0.45)
-	gm.roughness = 0.95
-	pm.material = gm
-	fm.mesh = pm
-	floor_body.add_child(fm)
-	a.add_child(floor_body)
-	# Boundary walls (invisible-ish low cliffs from rocks + collision)
+	# Procedural terrain (flat arena plateau + hills), generated at load by TerrainGen
+	var terrain := TerrainGen.new(); terrain.name = "Terrain"
+	a.add_child(terrain)
+	# Invisible boundary walls well outside the rim cliffs
 	for i in 4:
 		var w := StaticBody3D.new(); w.name = "Wall%d" % i; w.collision_layer = 1
-		var ws := CollisionShape3D.new(); var wb := BoxShape3D.new(); wb.size = Vector3(80, 12, 1); ws.shape = wb
+		var ws := CollisionShape3D.new(); var wb := BoxShape3D.new(); wb.size = Vector3(230, 80, 1); ws.shape = wb
 		w.add_child(ws)
-		w.position = Vector3(0, 6, -40).rotated(Vector3.UP, i * PI / 2.0)
+		w.position = Vector3(0, 40, -108).rotated(Vector3.UP, i * PI / 2.0)
 		w.rotation.y = i * PI / 2.0
 		a.add_child(w)
+	var forest := Forest.new(); forest.name = "Forest"
+	a.add_child(forest)
 	# Real rock assets (CC0 Terrain3D demo models) as landmarks / cover
 	var rocks := ["RockA", "RockB", "RockC"]
 	var spots := [Vector3(-12, 0, -14), Vector3(14, 0, -10), Vector3(-18, 0, 8), Vector3(20, 0, 14), Vector3(0, 0, -26), Vector3(-26, 0, -4), Vector3(27, 0, -3)]
@@ -241,7 +229,7 @@ func _build_arena() -> void:
 			var body := StaticBody3D.new()
 			body.name = "Rock%d" % i
 			body.collision_layer = 1
-			body.position = spots[i]
+			body.position = Vector3(spots[i].x, TerrainGen.height_at(spots[i].x, spots[i].z), spots[i].z)
 			body.rotation.y = i * 1.3
 			body.scale = Vector3.ONE * 1.4
 			body.add_child(inst)
@@ -252,26 +240,54 @@ func _build_arena() -> void:
 				cs2.shape = src.shape
 				body.add_child(cs2)
 			a.add_child(body)
-	# Light + environment
+	# Light + environment: low golden sun, filmic grade, bloom, AO, fog
 	var sun := DirectionalLight3D.new(); sun.name = "Sun"
-	sun.rotation_degrees = Vector3(-50, -30, 0)
+	sun.rotation_degrees = Vector3(-24, -40, 0)
+	sun.light_color = Color(1.0, 0.88, 0.72)
+	sun.light_energy = 1.5
 	sun.shadow_enabled = true
-	sun.light_energy = 1.1
+	sun.directional_shadow_max_distance = 130.0
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sun.shadow_blur = 1.2
 	a.add_child(sun)
 	var env := WorldEnvironment.new(); env.name = "WorldEnvironment"
 	var e := Environment.new()
 	var sky := Sky.new(); var psm := ProceduralSkyMaterial.new()
-	psm.sky_top_color = Color(0.18, 0.2, 0.32)
-	psm.sky_horizon_color = Color(0.55, 0.45, 0.5)
-	psm.ground_horizon_color = Color(0.3, 0.27, 0.28)
+	psm.sky_top_color = Color(0.16, 0.26, 0.5)
+	psm.sky_horizon_color = Color(0.95, 0.62, 0.4)
+	psm.sky_curve = 0.18
+	psm.ground_horizon_color = Color(0.6, 0.42, 0.32)
+	psm.ground_bottom_color = Color(0.12, 0.1, 0.1)
+	psm.sun_angle_max = 25.0
+	psm.sun_curve = 0.1
 	sky.sky_material = psm
 	e.sky = sky
 	e.background_mode = Environment.BG_SKY
 	e.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	e.ambient_light_energy = 0.8
+	e.tonemap_mode = Environment.TONE_MAPPER_ACES
+	e.tonemap_exposure = 0.9
+	e.glow_enabled = true
+	e.glow_intensity = 0.9
+	e.glow_bloom = 0.08
+	e.glow_hdr_threshold = 1.0
+	e.ssao_enabled = true
+	e.ssao_radius = 1.6
+	e.ssao_intensity = 2.0
+	e.ssil_enabled = false
 	e.fog_enabled = true
-	e.fog_light_color = Color(0.45, 0.4, 0.45)
-	e.fog_density = 0.006
+	e.fog_light_color = Color(0.82, 0.62, 0.5)
+	e.fog_light_energy = 1.0
+	e.fog_sun_scatter = 0.35
+	e.fog_density = 0.0025
+	e.fog_aerial_perspective = 0.5
+	e.volumetric_fog_enabled = true
+	e.volumetric_fog_density = 0.006
+	e.volumetric_fog_albedo = Color(0.9, 0.75, 0.65)
+	e.volumetric_fog_length = 90.0
+	e.adjustment_enabled = true
+	e.adjustment_contrast = 1.12
+	e.adjustment_saturation = 1.12
 	env.environment = e
 	a.add_child(env)
 	# Markers

@@ -12,6 +12,7 @@
 - v0.2.0: block (reduced damage, guard break when out of stamina), parry window, two cooldown abilities (Shadow Step dash with i-frames, Ground Slam AoE) with HUD cooldown bars.
 - v0.3.0 (Phase 5, first pass): Kayn's permanent path choice. Altar in the arena (press G) opens a choice screen showing pros/cons and a confirmation step; Shadow Assassin (fast, fragile, short Shadow Step cooldown) and Rhaast (tanky, hard-hitting, lifesteal, short Ground Slam cooldown) change stats, colour and weapon shape. Choice autosaves to user://save_singleplayer.cfg and reloads on start.
 - Rocks in the arena are solid (wrapped in StaticBody3D - the demo scenes only carried a shape). Navmesh baked at load; enemies use NavigationAgent3D to path around obstacles. Pause menu (Esc).
+- Visual pass 1: procedural terrain (flat arena plateau + hills, slope-blended grass/rock shader), 420 low-poly pines with trunk colliders, ~16k wind-swayed grass clumps, golden-hour lighting, ACES tonemap, bloom, SSAO, fog + volumetric fog. Navmesh now baked from terrain; rocks carve holes via NavigationObstacle3D.
 - Test arena: real scene using CC0 rock models and ground texture from the Terrain3D demo.
 - Rendering verified once with xvfb + OpenGL (screenshot looked correct).
 

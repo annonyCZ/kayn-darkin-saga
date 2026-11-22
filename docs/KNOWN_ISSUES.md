@@ -1,4 +1,6 @@
 # Known Issues
+- Forward+ effects (SSAO, volumetric fog, glow) could not be verified in screenshots here (software GL only); they are configured in code and should be checked in the editor/real GPU.
+- Grass/trees are procedural placeholders (no wind on trees, no LODs).
 - Placeholder capsule characters; procedural swing animation only.
 - Navigation is baked at load from static colliders (scripts/world/arena_nav.gd); fine for the test arena, large worlds need a pre-baked/tiled navmesh. Enemies do not yet avoid each other.
 - Gamepad bindings defined but never tested on hardware.
