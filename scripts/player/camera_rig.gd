@@ -54,11 +54,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			var inv: float = -1.0 if _invert_y() else 1.0
 			yaw -= m.relative.x * mouse_base_sens * _sens()
 			pitch -= m.relative.y * mouse_base_sens * _sens() * inv
-	elif event.is_action_pressed("pause"):
-		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		else:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED \
 			and DisplayServer.get_name() != "headless":
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

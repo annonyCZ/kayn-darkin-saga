@@ -1,64 +1,71 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=16 format=3]
 
-[ext_resource type="PackedScene" path="res://scenes/levels/test_arena.tscn" id="1_blune"]
-[ext_resource type="PackedScene" path="res://scenes/characters/player.tscn" id="2_th5th"]
-[ext_resource type="Script" path="res://scripts/player/player.gd" id="3_7smn1"]
-[ext_resource type="PackedScene" path="res://scenes/characters/camera_rig.tscn" id="4_raeie"]
-[ext_resource type="Script" path="res://scripts/player/camera_rig.gd" id="5_hxu8e"]
-[ext_resource type="PackedScene" path="res://scenes/interactables/path_altar.tscn" id="6_nvumn"]
-[ext_resource type="Script" path="res://scripts/world/path_altar.gd" id="7_ou6is"]
-[ext_resource type="PackedScene" path="res://scenes/enemies/enemy.tscn" id="8_necax"]
-[ext_resource type="Script" path="res://scripts/ai/enemy.gd" id="9_r4lks"]
-[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="10_pg34l"]
-[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="11_m4h2d"]
-[ext_resource type="Script" path="res://scripts/core/main_boot.gd" id="12_p8abn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/test_arena.tscn" id="1_raeie"]
+[ext_resource type="Script" path="res://scripts/world/arena_nav.gd" id="2_hxu8e"]
+[ext_resource type="PackedScene" path="res://scenes/characters/player.tscn" id="3_nvumn"]
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="4_ou6is"]
+[ext_resource type="PackedScene" path="res://scenes/characters/camera_rig.tscn" id="5_necax"]
+[ext_resource type="Script" path="res://scripts/player/camera_rig.gd" id="6_r4lks"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/path_altar.tscn" id="7_pg34l"]
+[ext_resource type="Script" path="res://scripts/world/path_altar.gd" id="8_m4h2d"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/enemy.tscn" id="9_p8abn"]
+[ext_resource type="Script" path="res://scripts/ai/enemy.gd" id="10_s17dp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="11_37hlw"]
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="12_6llfj"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="13_0bhws"]
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="14_62atk"]
+[ext_resource type="Script" path="res://scripts/core/main_boot.gd" id="15_i7in8"]
 
 [node name="Main" type="Node3D"]
 
-[node name="TestArena" type="Node3D" parent="." instance=ExtResource("1_blune")]
+[node name="TestArena" type="Node3D" parent="." instance=ExtResource("1_raeie")]
+script = ExtResource("2_hxu8e")
 
-[node name="Player" type="CharacterBody3D" parent="." instance=ExtResource("2_th5th")]
+[node name="Player" type="CharacterBody3D" parent="." instance=ExtResource("3_nvumn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 10)
 collision_layer = 2
 collision_mask = 5
-script = ExtResource("3_7smn1")
+script = ExtResource("4_ou6is")
 
-[node name="CameraRig" type="Node3D" parent="." instance=ExtResource("4_raeie")]
-script = ExtResource("5_hxu8e")
+[node name="CameraRig" type="Node3D" parent="." instance=ExtResource("5_necax")]
+script = ExtResource("6_r4lks")
 
-[node name="PathAltar" type="Area3D" parent="." instance=ExtResource("6_nvumn")]
+[node name="PathAltar" type="Area3D" parent="." instance=ExtResource("7_pg34l")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 8)
-script = ExtResource("7_ou6is")
+script = ExtResource("8_m4h2d")
 
-[node name="Enemy0" type="CharacterBody3D" parent="." instance=ExtResource("8_necax")]
+[node name="Enemy0" type="CharacterBody3D" parent="." instance=ExtResource("9_p8abn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.1, 2)
 collision_layer = 4
 collision_mask = 7
-script = ExtResource("9_r4lks")
+script = ExtResource("10_s17dp")
 display_name = "Training Dummy"
 aggressive = false
 
-[node name="Enemy1" type="CharacterBody3D" parent="." instance=ExtResource("8_necax")]
+[node name="Enemy1" type="CharacterBody3D" parent="." instance=ExtResource("9_p8abn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.1, -8)
 collision_layer = 4
 collision_mask = 7
-script = ExtResource("9_r4lks")
+script = ExtResource("10_s17dp")
 
-[node name="Enemy2" type="CharacterBody3D" parent="." instance=ExtResource("8_necax")]
+[node name="Enemy2" type="CharacterBody3D" parent="." instance=ExtResource("9_p8abn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0.1, -10)
 collision_layer = 4
 collision_mask = 7
-script = ExtResource("9_r4lks")
+script = ExtResource("10_s17dp")
 
-[node name="Enemy3" type="CharacterBody3D" parent="." instance=ExtResource("8_necax")]
+[node name="Enemy3" type="CharacterBody3D" parent="." instance=ExtResource("9_p8abn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -18)
 collision_layer = 4
 collision_mask = 7
-script = ExtResource("9_r4lks")
+script = ExtResource("10_s17dp")
 display_name = "Husk Brute"
 
-[node name="Hud" type="CanvasLayer" parent="." instance=ExtResource("10_pg34l")]
-script = ExtResource("11_m4h2d")
+[node name="PauseMenu" type="CanvasLayer" parent="." instance=ExtResource("11_37hlw")]
+script = ExtResource("12_6llfj")
+
+[node name="Hud" type="CanvasLayer" parent="." instance=ExtResource("13_0bhws")]
+script = ExtResource("14_62atk")
 
 [node name="Boot" type="Node" parent="."]
-script = ExtResource("12_p8abn")
+script = ExtResource("15_i7in8")

@@ -26,7 +26,9 @@ var state: State = State.IDLE
 var _t: float = 0.0
 var _player: Node3D
 var _tween: Tween
+var _repath: float = 0.0
 
+@onready var agent: NavigationAgent3D = get_node_or_null("Agent")
 @onready var health: HealthComponent = $Health
 @onready var model: Node3D = $Model
 @onready var body_mesh: MeshInstance3D = $Model/Body
@@ -88,7 +90,7 @@ func _physics_process(delta: float) -> void:
 			if not _player_alive() or dist > detect_range * 1.8:
 				_set_state(State.IDLE)
 			elif dist > attack_range * 0.9:
-				var d := to_p.normalized()
+				var d := _chase_dir(to_p, delta)
 				velocity.x = d.x * move_speed
 				velocity.z = d.z * move_speed
 				_face(d, delta)
@@ -121,6 +123,23 @@ func _physics_process(delta: float) -> void:
 		State.DEAD:
 			_brake(delta)
 	move_and_slide()
+
+## Direction toward the player: follows the navmesh when one exists, else straight line.
+func _chase_dir(to_p: Vector3, delta: float) -> Vector3:
+	if agent == null or dist_to_nav_unavailable():
+		return to_p.normalized()
+	_repath -= delta
+	if _repath <= 0.0:
+		_repath = 0.25
+		agent.target_position = _find_player().global_position
+	var nxt := agent.get_next_path_position() - global_position
+	nxt.y = 0.0
+	if nxt.length() < 0.05:
+		return to_p.normalized()
+	return nxt.normalized()
+
+func dist_to_nav_unavailable() -> bool:
+	return NavigationServer3D.map_get_regions(get_world_3d().navigation_map).is_empty()
 
 func _brake(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, 30.0 * delta)

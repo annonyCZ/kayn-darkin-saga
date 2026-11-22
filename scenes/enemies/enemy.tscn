@@ -50,6 +50,10 @@ script = ExtResource("2_fcftc")
 max_health = 70.0
 max_poise = 30.0
 
+[node name="Agent" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.6
+target_desired_distance = 0.5
+
 [node name="Model" type="Node3D" parent="."]
 
 [node name="Body" type="MeshInstance3D" parent="Model"]

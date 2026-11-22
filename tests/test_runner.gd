@@ -69,6 +69,21 @@ func _ready() -> void:
 		(n as Enemy).aggressive = false
 	dummy = main.get_node("Enemy0") as Enemy
 
+	print("== World collision and navigation")
+	var space: PhysicsDirectSpaceState3D = main.get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(Vector3(-22, 1.0, -14), Vector3(-4, 1.0, -14))
+	q.collision_mask = 1
+	var rh: Dictionary = space.intersect_ray(q)
+	check(not rh.is_empty() and rh.position.x < -8.0, "rock blocks a horizontal ray (rocks have collision)")
+	var nav_map: RID = main.get_world_3d().navigation_map
+	check(not NavigationServer3D.map_get_regions(nav_map).is_empty(), "navigation region baked at load")
+	await frames(3)
+	var path: PackedVector3Array = NavigationServer3D.map_get_path(nav_map, Vector3(6, 0, -10), Vector3(22, 0, -10), true)
+	var plen := 0.0
+	for i in range(1, path.size()):
+		plen += path[i].distance_to(path[i - 1])
+	check(path.size() >= 2 and plen > 16.5, "navmesh path detours around a rock (len %.1f > 16)" % plen)
+
 	print("== Movement")
 	var start := player.global_position
 	rig.yaw = 0.0
@@ -310,6 +325,13 @@ func _ready() -> void:
 	check(not altar.try_open(), "altar cannot be reused after choice")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_save.cfg"))
 	gs.reset_campaign()
+
+	print("== Pause menu")
+	var pm := main.get_node("PauseMenu") as PauseMenu
+	pm.toggle()
+	check(pm.is_open() and get_tree().paused, "pause menu opens and pauses the tree")
+	pm.toggle()
+	check(not pm.is_open() and not get_tree().paused, "pause menu closes and resumes")
 
 	print("\n%d checks, %d failed" % [_checks, _fails])
 	get_tree().quit(1 if _fails > 0 else 0)

@@ -21,7 +21,7 @@ Characters are placeholders; no audio, story, inventory, saves or co-op yet. See
 | Abilities (Shadow Step, Ground Slam) | Q, E | RB, D-pad down |
 | Lock-on, switch target | Tab, mouse wheel | R3, D-pad left/right |
 | Interact (altar) | G | D-pad up |
-| Release mouse | Esc | |
+| Pause | Esc | Start |
 
 ## Tests
 ```

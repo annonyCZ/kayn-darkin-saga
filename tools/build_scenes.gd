@@ -64,6 +64,7 @@ func _init() -> void:
 	_build_enemy()
 	_build_camera_rig()
 	_build_hud()
+	_build_pause_menu()
 	_build_altar()
 	_build_arena()
 	_build_main()
@@ -122,6 +123,12 @@ func _build_enemy() -> void:
 	h.max_health = 70.0
 	h.max_poise = 30.0
 	e.add_child(h)
+	var agent := NavigationAgent3D.new()
+	agent.name = "Agent"
+	agent.radius = 0.5
+	agent.path_desired_distance = 0.6
+	agent.target_desired_distance = 0.5
+	e.add_child(agent)
 	var model := Node3D.new()
 	model.name = "Model"
 	e.add_child(model)
@@ -185,13 +192,18 @@ func _build_altar() -> void:
 	a.add_child(lt)
 	_save(a, "res://scenes/interactables/path_altar.tscn")
 
+func _build_pause_menu() -> void:
+	var pm := PauseMenu.new()
+	pm.name = "PauseMenu"
+	_save(pm, "res://scenes/ui/pause_menu.tscn")
+
 func _build_hud() -> void:
 	var h := Hud.new()
 	h.name = "Hud"
 	_save(h, "res://scenes/ui/hud.tscn")
 
 func _build_arena() -> void:
-	var a := Node3D.new()
+	var a := ArenaNav.new()
 	a.name = "TestArena"
 	# Floor
 	var floor_body := StaticBody3D.new(); floor_body.name = "Floor"; floor_body.collision_layer = 1
@@ -224,12 +236,22 @@ func _build_arena() -> void:
 	for i in spots.size():
 		var ps: PackedScene = load("res://assets/environments/terrain3d_demo/models/%s.tscn" % rocks[i % 3])
 		if ps:
+			# The demo rock scenes carry a collision *shape* but no body, so wrap them in a StaticBody3D.
 			var inst := ps.instantiate() as Node3D
-			inst.name = "Rock%d" % i
-			inst.position = spots[i]
-			inst.rotation.y = i * 1.3
-			inst.scale = Vector3.ONE * 1.4
-			a.add_child(inst)
+			var body := StaticBody3D.new()
+			body.name = "Rock%d" % i
+			body.collision_layer = 1
+			body.position = spots[i]
+			body.rotation.y = i * 1.3
+			body.scale = Vector3.ONE * 1.4
+			body.add_child(inst)
+			var src := inst.get_node_or_null("CollisionShape3D") as CollisionShape3D
+			if src:
+				var cs2 := CollisionShape3D.new()
+				cs2.name = "CollisionShape3D"
+				cs2.shape = src.shape
+				body.add_child(cs2)
+			a.add_child(body)
 	# Light + environment
 	var sun := DirectionalLight3D.new(); sun.name = "Sun"
 	sun.rotation_degrees = Vector3(-50, -30, 0)
@@ -283,6 +305,7 @@ func _build_main() -> void:
 		en.aggressive = defs[i][1]
 		en.position = defs[i][2]
 		m.add_child(en)
+	m.add_child(load("res://scenes/ui/pause_menu.tscn").instantiate())
 	var hud: Hud = load("res://scenes/ui/hud.tscn").instantiate()
 	m.add_child(hud)
 	# Wire camera to player at runtime

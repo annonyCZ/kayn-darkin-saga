@@ -47,7 +47,7 @@ func _ready() -> void:
 	_target_box.add_child(_target_hp)
 
 	_hint = Label.new()
-	_hint.text = "WASD move  |  Shift sprint  |  Space jump  |  Ctrl dodge  |  LMB light combo  |  RMB heavy  |  F block (tap just before a hit = parry)  |  Q/E abilities  |  Tab lock-on (wheel: switch)  |  Esc release mouse"
+	_hint.text = "WASD move  |  Shift sprint  |  Space jump  |  Ctrl dodge  |  LMB light combo  |  RMB heavy  |  F block (tap just before a hit = parry)  |  Q/E abilities  |  Tab lock-on (wheel: switch)  |  Esc pause"
 	_hint.position = Vector2(24, 0)
 	_hint.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_hint.position = Vector2(24, -34)
