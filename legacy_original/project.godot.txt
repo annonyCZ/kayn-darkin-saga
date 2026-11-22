@@ -1,0 +1,95 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Kayn"
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+config/icon="res://icon.svg"
+
+[display]
+
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[input]
+
+ui_right="gamepad/left/analog/x positive"
+#Keyboard+MouseActionsmove_forward="w"
+move_backward="s"
+move_left="a"
+move_right="d"
+sprint="shift_left"
+jump="space"
+dodge="ctrl_left"
+crouch="c"
+camera_look="mouse/motion"
+camera_zoom_in="mouse/wheel_up"
+camera_zoom_out="mouse/wheel_down"
+camera_reset="home"
+light_attack="mouse/left"
+heavy_attack="mouse/right"
+ability_1="q"
+ability_2="e"
+ability_3="r"
+ultimate_ability="f"
+block="mouse/middle"
+parry="v"
+lock_on="tab"
+target_next="mouse/wheel_up_whenfocused"
+target_previous="mouse/wheel_down_whenfocused"
+interact="g"
+pickup_item="g"
+dialogue_skip="space"
+dialogue_next="enter"
+pause="escape"
+inventory="i"
+character_menu="p"
+skills_menu="k"
+map="m"
+quest_log="j"
+settings="o"
+#Gamepad-XboxandPlayStationcompatibility#Leftanalogstick-movementui_left="gamepad/left/analog/x negative"
+ui_forward="gamepad/left/analog/y positive"
+ui_back="gamepad/left/analog/y negative"
+#Rightanalogstick-cameraui_camera_left="gamepad/right/analog/x"
+ui_camera_up="gamepad/right/analog/y"
+ui_camera_right="gamepad/right/analog/x negative"
+ui_camera_down="gamepad/right/analog/y negative"
+#Buttonsgamepad_light_attack="gamepad/right/trigger"
+gamepad_heavy_attack="gamepad/right/bumper"
+gamepad_ability_1="gamepad/left/shoulder"
+gamepad_ability_2="gamepad/left/trigger"
+gamepad_ability_3="gamepad/center/up"
+gamepad_ultimate_ability="gamepad/left/trigger"
+gamepad_block="gamepad/left/trigger"
+gamepad_parry="gamepad/key/y"
+gamepad_lock_on="gamepad/right/stick"
+gamepad_sprint="gamepad/left/stick/button"
+gamepad_start="gamepad/start"
+gamepad_a="gamepad/face/a"
+gamepad_b="gamepad/face/b"
+gamepad_x="gamepad/face/x"
+gamepad_y="gamepad/face/y"
+gamepad_dpad_up="gamepad/dpad/up"
+gamepad_dpad_down="gamepad/dpad/down"
+#Alternativegamepadmappings(PlayStationlayout)gamepad_cross="gamepad/face/cross"
+gamepad_circle="gamepad/face/circle"
+gamepad_square="gamepad/face/square"
+gamepad_triangle="gamepad/face/triangle"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"

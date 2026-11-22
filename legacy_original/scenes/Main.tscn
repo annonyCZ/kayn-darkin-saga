@@ -1,0 +1,11 @@
+[gd_scene]
+
+[node name="PlayerRoot" type="Node3D"]
+
+[node name="CameraPivot" type="Node3D" parent="PlayerRoot"]
+
+[node name="Camera" type="Camera3D" parent="CameraPivot"]
+
+[node name="AreaLight3D" type="OmniLight3D" parent="PlayerRoot"]
+
+[node name="Player" type="CharacterBody3D" parent="PlayerRoot"]

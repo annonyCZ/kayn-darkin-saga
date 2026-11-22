@@ -1,0 +1,118 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/environments/terrain3d_demo/textures/ground037_alb_ht.png" id="1_gt1ig"]
+[ext_resource type="Texture2D" path="res://assets/environments/terrain3d_demo/textures/ground037_nrm_rgh.png" id="2_8124a"]
+[ext_resource type="PackedScene" path="res://assets/environments/terrain3d_demo/models/RockA.tscn" id="3_p77yg"]
+[ext_resource type="PackedScene" path="res://assets/environments/terrain3d_demo/models/RockB.tscn" id="4_ccvsq"]
+[ext_resource type="PackedScene" path="res://assets/environments/terrain3d_demo/models/RockC.tscn" id="5_3h0lk"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0271w"]
+size = Vector3(80, 1, 80)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ws1r0"]
+albedo_color = Color(0.5, 0.6, 0.45, 1)
+albedo_texture = ExtResource("1_gt1ig")
+roughness = 0.95
+normal_enabled = true
+normal_texture = ExtResource("2_8124a")
+uv1_scale = Vector3(16, 16, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_o4ynd"]
+material = SubResource("StandardMaterial3D_ws1r0")
+size = Vector2(80, 80)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wgcdj"]
+size = Vector3(80, 12, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d0fhh"]
+size = Vector3(80, 12, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8jdsg"]
+size = Vector3(80, 12, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lnttm"]
+size = Vector3(80, 12, 1)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_qhbuc"]
+sky_top_color = Color(0.18, 0.2, 0.32, 1)
+sky_horizon_color = Color(0.55, 0.45, 0.5, 1)
+ground_horizon_color = Color(0.3, 0.27, 0.28, 1)
+
+[sub_resource type="Sky" id="Sky_ic7lk"]
+sky_material = SubResource("ProceduralSkyMaterial_qhbuc")
+
+[sub_resource type="Environment" id="Environment_ougx0"]
+background_mode = 2
+sky = SubResource("Sky_ic7lk")
+ambient_light_source = 3
+tonemap_mode = 2
+fog_enabled = true
+fog_light_color = Color(0.45, 0.4, 0.45, 1)
+fog_density = 0.006
+
+[node name="TestArena" type="Node3D"]
+
+[node name="Floor" type="StaticBody3D" parent="."]
+
+[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_0271w")
+
+[node name="@MeshInstance3D@5" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("PlaneMesh_o4ynd")
+
+[node name="Wall0" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -40)
+
+[node name="@CollisionShape3D@6" type="CollisionShape3D" parent="Wall0"]
+shape = SubResource("BoxShape3D_wgcdj")
+
+[node name="Wall1" type="StaticBody3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -40, 6, 1.7484556e-06)
+
+[node name="@CollisionShape3D@7" type="CollisionShape3D" parent="Wall1"]
+shape = SubResource("BoxShape3D_d0fhh")
+
+[node name="Wall2" type="StaticBody3D" parent="."]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.4969112e-06, 6, 40)
+
+[node name="@CollisionShape3D@8" type="CollisionShape3D" parent="Wall2"]
+shape = SubResource("BoxShape3D_8jdsg")
+
+[node name="Wall3" type="StaticBody3D" parent="."]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 40, 6, -4.7699524e-07)
+
+[node name="@CollisionShape3D@9" type="CollisionShape3D" parent="Wall3"]
+shape = SubResource("BoxShape3D_lnttm")
+
+[node name="Rock0" type="Node3D" parent="." instance=ExtResource("3_p77yg")]
+transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, -12, 0, -14)
+
+[node name="Rock1" type="Node3D" parent="." instance=ExtResource("4_ccvsq")]
+transform = Transform3D(0.37449843, 0, 1.3489815, 0, 1.4, 0, -1.3489815, 0, 0.37449843, 14, 0, -10)
+
+[node name="Rock2" type="Node3D" parent="." instance=ExtResource("5_3h0lk")]
+transform = Transform3D(-1.1996442, 0, 0.721702, 0, 1.4, 0, -0.721702, 0, -1.1996442, -18, 0, 8)
+
+[node name="Rock3" type="Node3D" parent="." instance=ExtResource("3_p77yg")]
+transform = Transform3D(-1.0163051, 0, -0.96287274, 0, 1.4, 0, 0.96287274, 0, -1.0163051, 20, 0, 14)
+
+[node name="Rock4" type="Node3D" parent="." instance=ExtResource("4_ccvsq")]
+transform = Transform3D(0.65592307, 0, -1.2368367, 0, 1.4, 0, 1.2368367, 0, 0.65592307, 0, 0, -26)
+
+[node name="Rock5" type="Node3D" parent="." instance=ExtResource("5_3h0lk")]
+transform = Transform3D(1.3672227, 0, 0.30116796, 0, 1.4, 0, -0.30116796, 0, 1.3672227, -26, 0, -4)
+
+[node name="Rock6" type="Node3D" parent="." instance=ExtResource("3_p77yg")]
+transform = Transform3D(0.075537324, 0, 1.3979607, 0, 1.4, 0, -1.3979607, 0, 0.075537324, 27, 0, -3)
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660254, 0.38302222, -0.32139382, 0, 0.64278764, 0.76604444, 0.5, -0.66341394, 0.5566704, 0, 0, 0)
+light_energy = 1.1
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ougx0")
+
+[node name="PlayerSpawn" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 10)

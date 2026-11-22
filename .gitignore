@@ -1,0 +1,8 @@
+.godot/
+/user/
+*.tscn.user
+/export_*/
+*.translation
+# Optional third-party addon, install manually (see NOTICE.md)
+/addons/
+godot.zip

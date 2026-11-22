@@ -1,0 +1,90 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_76oj4"]
+[ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="2_dyp2m"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="3_atpat"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kqtwu"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6eyoc"]
+albedo_color = Color(0.18, 0.12, 0.28, 1)
+roughness = 0.6
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_eojnx"]
+material = SubResource("StandardMaterial3D_6eyoc")
+radius = 0.38
+height = 1.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qgnko"]
+albedo_color = Color(0.9, 0.2, 0.3, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_7vyk4"]
+material = SubResource("StandardMaterial3D_qgnko")
+size = Vector3(0.36, 0.08, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2l4js"]
+albedo_color = Color(0.75, 0.75, 0.85, 1)
+metallic = 0.9
+roughness = 0.25
+
+[sub_resource type="BoxMesh" id="BoxMesh_jk2m4"]
+material = SubResource("StandardMaterial3D_2l4js")
+size = Vector3(0.09, 0.05, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xhtjm"]
+albedo_color = Color(0.3, 0.2, 0.1, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_k4v7y"]
+material = SubResource("StandardMaterial3D_xhtjm")
+size = Vector3(0.3, 0.07, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xrqxk"]
+size = Vector3(2.4, 1.6, 2.4)
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_76oj4")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_kqtwu")
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("2_dyp2m")
+max_health = 120.0
+max_poise = 45.0
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_eojnx")
+
+[node name="Visor" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -0.34)
+mesh = SubResource("BoxMesh_7vyk4")
+
+[node name="SwordPivot" type="Node3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 1.25, -0.1)
+
+[node name="Blade" type="MeshInstance3D" parent="Model/SwordPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.75)
+mesh = SubResource("BoxMesh_jk2m4")
+
+[node name="Guard" type="MeshInstance3D" parent="Model/SwordPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.05)
+mesh = SubResource("BoxMesh_k4v7y")
+
+[node name="Hitbox" type="Area3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -1.2)
+collision_layer = 0
+collision_mask = 4
+script = ExtResource("3_atpat")
+
+[node name="@CollisionShape3D@2" type="CollisionShape3D" parent="Model/Hitbox"]
+shape = SubResource("BoxShape3D_xrqxk")

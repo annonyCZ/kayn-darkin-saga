@@ -1,0 +1,27 @@
+# Project State (updated 2026-11-18)
+
+**Engine:** Godot 4.5 (verified headless). Original project targeted 4.7; `config/features` set to 4.5 so it opens in 4.5+.
+
+## Done and verified (41 automated checks pass)
+- Phase 0: project initialised, folder structure, git, docs.
+- Milestone 1 playable prototype: third-person over-the-shoulder camera (collision, lock-on framing, shake),
+  camera-relative movement (run/sprint/jump), stamina, dodge with i-frames, 3-hit light combo + heavy with
+  buffering and dodge-cancel, hitbox/health/poise/stagger, hit-stop, lock-on + target switching,
+  melee enemy AI with red-glow telegraph, death/respawn, HUD, rebindable inputs (saved to user://settings.cfg),
+  permanent Kayn path choice logic (GameState).
+- v0.2.0: block (reduced damage, guard break when out of stamina), parry window, two cooldown abilities (Shadow Step dash with i-frames, Ground Slam AoE) with HUD cooldown bars.
+- Test arena: real scene using CC0 rock models and ground texture from the Terrain3D demo.
+- Rendering verified once with xvfb + OpenGL (screenshot looked correct).
+
+## Placeholder / not done
+- All characters are capsule placeholders; animation is procedural tweening (no skeletal animation).
+- No audio, VFX, navmesh (enemies walk straight at the player), menus, save/load, inventory, quests, NPCs, bosses.
+- Phases 3 (partial: gamepad untested, no walk toggle), 4 (partial: charged attacks missing), 5-14 not started.
+- Terrain3D addon is NOT in the repo (gitignored); install it for Phase 7 world terrain.
+- Kayn paths: Shadow Assassin / Rhaast logic stub only; no movesets yet.
+- No co-op networking yet.
+
+## Original files
+Your first attempt (`kayn.zip`) is preserved in `legacy_original/` (ignored by Godot). Its scripts were not valid
+GDScript (stray string "docstrings", mixed indentation) and its project.godot input section was malformed, so
+they were rewritten rather than patched; the path-choice idea lives on in `scripts/core/game_state.gd`.

@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/camera_rig.gd" id="1_lw450"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_23wk3"]
+radius = 0.25
+
+[node name="CameraRig" type="Node3D"]
+script = ExtResource("1_lw450")
+
+[node name="Yaw" type="Node3D" parent="."]
+
+[node name="Pitch" type="Node3D" parent="Yaw"]
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Yaw/Pitch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0.2, 0)
+shape = SubResource("SphereShape3D_23wk3")
+spring_length = 4.6
+margin = 0.3
+
+[node name="Camera3D" type="Camera3D" parent="Yaw/Pitch/SpringArm3D"]
+current = true
+fov = 70.0
