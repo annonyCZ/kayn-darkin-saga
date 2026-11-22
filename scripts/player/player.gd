@@ -63,6 +63,11 @@ var _rig: CameraRig
 var blocking: bool = false
 var _block_t: float = 0.0
 var _cooldowns: Dictionary = {"dashslash": 0.0, "slam": 0.0}
+var _cd_max: Dictionary = {"dashslash": 6.0, "slam": 10.0}
+var path: int = KaynPaths.Path.HUMAN
+var profile: Dictionary = KaynPaths.profile(KaynPaths.Path.HUMAN)
+var _cur_atk: Dictionary = {}
+var _base_max_health: float = 0.0
 
 @onready var health: HealthComponent = $Health
 @onready var model: Node3D = $Model
@@ -79,7 +84,42 @@ func _ready() -> void:
 	health.staggered.connect(_on_staggered)
 	health.died.connect(_on_died)
 	health.intercept = _intercept_damage
+	_base_max_health = health.max_health
 	_reset_sword()
+	var gs := get_node_or_null("/root/GameState")
+	if gs:
+		gs.path_chosen.connect(apply_path)
+		apply_path(int(gs.kayn_path))
+
+## Applies one of Kayn's forms: stat multipliers, colour and weapon shape.
+func apply_path(new_path: int) -> void:
+	path = new_path
+	profile = KaynPaths.profile(new_path)
+	var frac := health.fraction() if health.max_health > 0.0 else 1.0
+	health.max_health = _base_max_health * float(profile["hp_mult"])
+	health.health = health.max_health * frac
+	health.max_poise = 45.0 * float(profile["poise_mult"])
+	health.poise = health.max_poise
+	health.changed.emit()
+	var mat := body_mesh.get_active_material(0) as StandardMaterial3D
+	if mat == null:
+		mat = body_mesh.mesh.surface_get_material(0) as StandardMaterial3D
+	if mat:
+		var m := mat.duplicate() as StandardMaterial3D
+		m.albedo_color = profile["body_color"]
+		body_mesh.material_override = m
+	sword_pivot.scale = profile["blade_scale"]
+	for k: String in _cd_max:
+		_cd_max[k] = float(ATTACKS[k]["cd"]) * float(profile["cd_mult"][k])
+
+func _scaled_attack(name: String) -> Dictionary:
+	var a: Dictionary = (ATTACKS[name] as Dictionary).duplicate()
+	var t: float = profile["time_mult"]
+	a["windup"] = float(a["windup"]) * t
+	a["recover"] = float(a["recover"]) * t
+	a["dmg"] = float(a["dmg"]) * float(profile["damage_mult"])
+	a["poise"] = float(a["poise"]) * float(profile["damage_mult"])
+	return a
 
 func _get_rig() -> CameraRig:
 	if _rig == null or not is_instance_valid(_rig):
@@ -140,7 +180,7 @@ func _locomotion(delta: float) -> void:
 		blocking = want_block
 		sword_pivot.rotation_degrees = Vector3(70.0, 0.0, 0.0) if blocking else Vector3(0.0, 40.0, 0.0)
 	var sprinting := Input.is_action_pressed("sprint") and dir != Vector3.ZERO and stamina > 1.0 and not blocking
-	var speed := SPRINT_SPEED if sprinting else RUN_SPEED
+	var speed := (SPRINT_SPEED if sprinting else RUN_SPEED) * float(profile["speed_mult"])
 	if blocking:
 		speed *= 0.5
 	if sprinting:
@@ -250,16 +290,17 @@ func cooldown_left(ability: String) -> float:
 	return _cooldowns.get(ability, 0.0)
 
 func cooldown_fraction(ability: String) -> float:
-	return cooldown_left(ability) / float(ATTACKS[ability]["cd"])
+	return cooldown_left(ability) / float(_cd_max[ability])
 
 func _try_ability(ability: String) -> void:
 	if _cooldowns[ability] > 0.0 or stamina < float(ATTACKS[ability]["cost"]):
 		return
-	_cooldowns[ability] = float(ATTACKS[ability]["cd"])
+	_cooldowns[ability] = float(_cd_max[ability])
 	_start_attack(ability)
 
 func _start_attack(name: String) -> void:
-	var atk: Dictionary = ATTACKS[name]
+	var atk: Dictionary = _scaled_attack(name)
+	_cur_atk = atk
 	var cost: float = atk.get("cost", 12.0 if name != "heavy" else 25.0)
 	if not _spend_stamina(cost):
 		return
@@ -282,7 +323,7 @@ func _start_attack(name: String) -> void:
 	_animate_swing(atk)
 
 func _attack(delta: float) -> void:
-	var atk: Dictionary = ATTACKS[_attack_name]
+	var atk: Dictionary = _cur_atk
 	_attack_t += delta
 	var windup: float = atk["windup"]
 	var active: float = atk["active"]
@@ -362,7 +403,9 @@ func _reset_sword() -> void:
 		_tween.kill()
 	sword_pivot.rotation_degrees = Vector3(0.0, 40.0, 0.0)
 
-func _on_hit_landed(_target: Node, _amount: float) -> void:
+func _on_hit_landed(_target: Node, amount: float) -> void:
+	if float(profile["lifesteal"]) > 0.0:
+		health.heal(amount * float(profile["lifesteal"]))
 	# hit-stop + camera shake for impact feedback
 	var r := _get_rig()
 	if r:

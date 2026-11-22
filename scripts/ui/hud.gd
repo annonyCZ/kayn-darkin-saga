@@ -11,6 +11,7 @@ var _target_hp: ProgressBar
 var _death: Label
 var _hint: Label
 var _mouse_hint: Label
+var _path_label: Label
 var _ability_bars: Dictionary = {}
 var _ability_labels: Dictionary = {}
 
@@ -29,6 +30,9 @@ func _ready() -> void:
 	_st = _bar(Color(0.25, 0.7, 0.35), 12)
 	tl.add_child(_hp)
 	tl.add_child(_st)
+	_path_label = Label.new()
+	_path_label.add_theme_font_size_override("font_size", 14)
+	tl.add_child(_path_label)
 
 	_target_box = VBoxContainer.new()
 	_target_box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -106,6 +110,7 @@ func _process(_delta: float) -> void:
 		return
 	_hp.value = _player.health.fraction()
 	_st.value = _player.stamina / _player.max_stamina
+	_path_label.text = String(_player.profile["name"])
 	for key: String in _ability_bars:
 		(_ability_bars[key] as ProgressBar).value = 1.0 - _player.cooldown_fraction(key)
 	_death.visible = _player.state == Player.State.DEAD

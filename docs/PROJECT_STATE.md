@@ -2,7 +2,7 @@
 
 **Engine:** Godot 4.5 (verified headless). Original project targeted 4.7; `config/features` set to 4.5 so it opens in 4.5+.
 
-## Done and verified (41 automated checks pass)
+## Done and verified (57 automated checks pass)
 - Phase 0: project initialised, folder structure, git, docs.
 - Milestone 1 playable prototype: third-person over-the-shoulder camera (collision, lock-on framing, shake),
   camera-relative movement (run/sprint/jump), stamina, dodge with i-frames, 3-hit light combo + heavy with
@@ -10,6 +10,7 @@
   melee enemy AI with red-glow telegraph, death/respawn, HUD, rebindable inputs (saved to user://settings.cfg),
   permanent Kayn path choice logic (GameState).
 - v0.2.0: block (reduced damage, guard break when out of stamina), parry window, two cooldown abilities (Shadow Step dash with i-frames, Ground Slam AoE) with HUD cooldown bars.
+- v0.3.0 (Phase 5, first pass): Kayn's permanent path choice. Altar in the arena (press G) opens a choice screen showing pros/cons and a confirmation step; Shadow Assassin (fast, fragile, short Shadow Step cooldown) and Rhaast (tanky, hard-hitting, lifesteal, short Ground Slam cooldown) change stats, colour and weapon shape. Choice autosaves to user://save_singleplayer.cfg and reloads on start.
 - Test arena: real scene using CC0 rock models and ground texture from the Terrain3D demo.
 - Rendering verified once with xvfb + OpenGL (screenshot looked correct).
 
@@ -18,7 +19,7 @@
 - No audio, VFX, navmesh (enemies walk straight at the player), menus, save/load, inventory, quests, NPCs, bosses.
 - Phases 3 (partial: gamepad untested, no walk toggle), 4 (partial: charged attacks missing), 5-14 not started.
 - Terrain3D addon is NOT in the repo (gitignored); install it for Phase 7 world terrain.
-- Kayn paths: Shadow Assassin / Rhaast logic stub only; no movesets yet.
+- Kayn paths differ by stat multipliers only; unique movesets, abilities, animations and VFX per path are still to do. Path-specific narrative consequences not written.
 - No co-op networking yet.
 
 ## Original files

@@ -52,6 +52,8 @@ func reset_player(pos: Vector3) -> void:
 
 func _ready() -> void:
 	await get_tree().process_frame
+	get_node("/root/GameState").save_path = "user://test_save.cfg"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_save.cfg"))
 	main = (load("res://scenes/main/main.tscn") as PackedScene).instantiate()
 	add_child(main)
 	await frames(30)
@@ -261,11 +263,52 @@ func _ready() -> void:
 	check(InputMap.action_get_events("jump").size() >= 2, "reset restores defaults")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://settings.cfg"))
 
-	print("== Kayn path permanence")
+	print("== Kayn path permanence and effects")
 	var gs := get_node("/root/GameState")
 	gs.reset_campaign()
-	check(gs.choose_path(GameState.KaynPath.RHAAST), "can choose a path once")
-	check(not gs.choose_path(GameState.KaynPath.SHADOW_ASSASSIN), "second choice rejected (permanent)")
+	player.apply_path(KaynPaths.Path.HUMAN)
+	var base_hp := player.health.max_health
+	check(gs.choose_path(KaynPaths.Path.RHAAST), "can choose a path once")
+	check(not gs.choose_path(KaynPaths.Path.SHADOW_ASSASSIN), "second choice rejected (permanent)")
+	check(not gs.choose_path(KaynPaths.Path.HUMAN), "cannot 'choose' human form")
+	check(player.path == KaynPaths.Path.RHAAST, "player receives path via GameState signal")
+	check(is_equal_approx(player.health.max_health, base_hp * 1.3), "Rhaast: +30% max health")
+	var sc: Dictionary = player._scaled_attack("light1")
+	check(is_equal_approx(sc["dmg"], 12.0 * 1.35) and is_equal_approx(sc["recover"], 0.26 * 1.15), "Rhaast: stronger, slower attacks")
+	check(is_equal_approx(player._cd_max["slam"], 6.0), "Rhaast: Ground Slam cooldown -40%")
+	player.health.health = 50.0
+	player._on_hit_landed(dummy, 20.0)
+	check(is_equal_approx(player.health.health, 53.0), "Rhaast: heals 15% of damage dealt")
+	check(FileAccess.file_exists("user://test_save.cfg"), "choice autosaved")
+	gs.reset_campaign()
+	check(gs.load_game() and gs.path_locked and gs.kayn_path == KaynPaths.Path.RHAAST, "save/load restores locked path")
+	player.apply_path(KaynPaths.Path.SHADOW_ASSASSIN)
+	check(is_equal_approx(player._cd_max["dashslash"], 3.6) and player.profile["speed_mult"] == 1.2, "Shadow Assassin: faster, Shadow Step cooldown -40%")
+	var sa: Dictionary = player._scaled_attack("light1")
+	check(is_equal_approx(sa["recover"], 0.26 * 0.8), "Shadow Assassin: faster attacks")
+
+	print("== Path choice UI and altar")
+	gs.reset_campaign()
+	player.apply_path(KaynPaths.Path.HUMAN)
+	var altar := main.get_node("PathAltar") as PathAltar
+	player.global_position = altar.global_position
+	await frames(10)
+	check(altar.try_open(), "altar opens choice screen when player is near")
+	var ui: PathChoice = null
+	for c in get_tree().root.get_children():
+		if c is PathChoice:
+			ui = c
+	check(ui != null and get_tree().paused, "choice UI is up and game paused")
+	ui.select(KaynPaths.Path.SHADOW_ASSASSIN)
+	check(ui._confirm.visible and not ui._cards.visible, "confirmation prompt shown before committing")
+	ui.cancel()
+	check(not gs.path_locked, "backing out does not commit")
+	ui.select(KaynPaths.Path.SHADOW_ASSASSIN)
+	ui.confirm()
+	await frames(2)
+	check(gs.path_locked and gs.kayn_path == KaynPaths.Path.SHADOW_ASSASSIN and not get_tree().paused, "confirm commits, unpauses")
+	check(not altar.try_open(), "altar cannot be reused after choice")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_save.cfg"))
 	gs.reset_campaign()
 
 	print("\n%d checks, %d failed" % [_checks, _fails])

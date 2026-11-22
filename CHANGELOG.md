@@ -6,3 +6,6 @@
 ## 0.2.0 - 2026-11-22
 - Block, parry, guard break; Shadow Step and Ground Slam abilities with cooldown HUD; 41 tests.
 - Open-source setup: MIT license, README, CONTRIBUTING, NOTICE, CI workflow.
+
+## 0.3.0 - 2026-11-22
+- Kayn path choice: altar, choice/confirm UI, Shadow Assassin and Rhaast stat profiles, permanent per save, autosave/load (57 tests).

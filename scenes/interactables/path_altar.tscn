@@ -1,0 +1,53 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/path_altar.gd" id="1_goluy"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_no5b2"]
+height = 3.0
+radius = 2.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dq8f3"]
+albedo_color = Color(0.2, 0.2, 0.25, 1)
+roughness = 0.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_twylr"]
+material = SubResource("StandardMaterial3D_dq8f3")
+size = Vector3(0.9, 1.4, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5chyn"]
+albedo_color = Color(0.6, 0.1, 0.9, 1)
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.6, 0.15, 0.95, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_5xpbp"]
+material = SubResource("StandardMaterial3D_5chyn")
+radius = 0.25
+height = 0.5
+
+[node name="PathAltar" type="Area3D"]
+script = ExtResource("1_goluy")
+
+[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("CylinderShape3D_no5b2")
+
+[node name="Pillar" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+mesh = SubResource("BoxMesh_twylr")
+
+[node name="Orb" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+mesh = SubResource("SphereMesh_5xpbp")
+
+[node name="Prompt" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 0)
+visible = false
+billboard = 1
+font_size = 36
+
+[node name="Glow" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+light_color = Color(0.6, 0.2, 1, 1)
+omni_range = 7.0

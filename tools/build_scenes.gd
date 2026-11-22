@@ -64,6 +64,7 @@ func _init() -> void:
 	_build_enemy()
 	_build_camera_rig()
 	_build_hud()
+	_build_altar()
 	_build_arena()
 	_build_main()
 	quit()
@@ -153,6 +154,37 @@ func _build_camera_rig() -> void:
 	arm.add_child(cam)
 	_save(r, "res://scenes/characters/camera_rig.tscn")
 
+func _build_altar() -> void:
+	var a := PathAltar.new()
+	a.name = "PathAltar"
+	var cs := CollisionShape3D.new()
+	var sh := CylinderShape3D.new()
+	sh.radius = 2.8
+	sh.height = 3.0
+	cs.shape = sh
+	cs.position.y = 1.5
+	a.add_child(cs)
+	var pillar := _mesh(_box(Vector3(0.9, 1.4, 0.9)), _mat(Color(0.2, 0.2, 0.25), 0.5), Vector3(0, 0.7, 0), "Pillar")
+	a.add_child(pillar)
+	var orb_mat := _mat(Color(0.6, 0.1, 0.9), 0.2)
+	orb_mat.emission_enabled = true
+	orb_mat.emission = Color(0.6, 0.15, 0.95)
+	orb_mat.emission_energy_multiplier = 2.0
+	var sph := SphereMesh.new(); sph.radius = 0.25; sph.height = 0.5
+	a.add_child(_mesh(sph, orb_mat, Vector3(0, 1.7, 0), "Orb"))
+	var lbl := Label3D.new()
+	lbl.name = "Prompt"
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	lbl.position = Vector3(0, 2.6, 0)
+	lbl.font_size = 36
+	lbl.outline_size = 12
+	lbl.visible = false
+	a.add_child(lbl)
+	var lt := OmniLight3D.new(); lt.name = "Glow"; lt.light_color = Color(0.6, 0.2, 1.0)
+	lt.position = Vector3(0, 1.7, 0); lt.omni_range = 7.0
+	a.add_child(lt)
+	_save(a, "res://scenes/interactables/path_altar.tscn")
+
 func _build_hud() -> void:
 	var h := Hud.new()
 	h.name = "Hud"
@@ -234,6 +266,9 @@ func _build_main() -> void:
 	m.add_child(pl)
 	var rig: CameraRig = load("res://scenes/characters/camera_rig.tscn").instantiate()
 	m.add_child(rig)
+	var altar: Node3D = load("res://scenes/interactables/path_altar.tscn").instantiate()
+	altar.position = Vector3(7, 0, 8)
+	m.add_child(altar)
 	var enemy_ps: PackedScene = load("res://scenes/enemies/enemy.tscn")
 	var defs := [
 		["Training Dummy", false, Vector3(-4, 0.1, 2)],
