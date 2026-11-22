@@ -46,6 +46,52 @@ func _box(size: Vector3) -> BoxMesh:
 	b.size = size
 	return b
 
+func _node3d(name: String, pos: Vector3 = Vector3.ZERO) -> Node3D:
+	var n := Node3D.new()
+	n.name = name
+	n.position = pos
+	return n
+
+func _sphere(r: float) -> SphereMesh:
+	var m := SphereMesh.new()
+	m.radius = r
+	m.height = r * 2.0
+	return m
+
+func _cone_mesh(r: float, h: float) -> CylinderMesh:
+	var c := CylinderMesh.new()
+	c.top_radius = 0.0
+	c.bottom_radius = r
+	c.height = h
+	return c
+
+## Flat crescent blade lying in the XZ plane. Centre line is an arc of radius R from angle 0 to -sweep,
+## tapering to a point. Used for the scythe.
+func _crescent(center: Vector3, R: float, sweep_deg: float, half_w: float, thick: float, mat: Material) -> MeshInstance3D:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var n := 14
+	var outer: Array[Vector3] = []
+	var inner: Array[Vector3] = []
+	for k in n + 1:
+		var t := float(k) / n
+		var a := deg_to_rad(-sweep_deg) * t
+		var hw := half_w * (1.0 - t * t)
+		outer.append(center + Vector3(cos(a), 0, sin(a)) * (R + hw))
+		inner.append(center + Vector3(cos(a), 0, sin(a)) * (R - hw))
+	var up := Vector3(0, thick, 0)
+	for k in n:
+		for face: Array in [[outer[k] + up, outer[k + 1] + up, inner[k] + up], [outer[k + 1] + up, inner[k + 1] + up, inner[k] + up],
+				[outer[k] - up, inner[k] - up, outer[k + 1] - up], [outer[k + 1] - up, inner[k] - up, inner[k + 1] - up]]:
+			for p: Vector3 in face:
+				st.add_vertex(p)
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Blade"
+	mi.mesh = st.commit()
+	mi.material_override = mat
+	return mi
+
 func _hitbox(mask: int, size: Vector3, pos: Vector3) -> Hitbox:
 	var hb := Hitbox.new()
 	hb.name = "Hitbox"
@@ -70,6 +116,16 @@ func _init() -> void:
 	_build_main()
 	quit()
 
+func _node3D_head(skin: Material, hair: Material, red: Material) -> Node3D:
+	var head := _node3d("Head", Vector3(0, 1.82, 0))
+	head.add_child(_mesh(_sphere(0.15), skin, Vector3.ZERO, "Skull"))
+	head.add_child(_mesh(_box(Vector3(0.26, 0.06, 0.08)), red, Vector3(0, 0.02, -0.12), "Visor"))
+	for i in 5:
+		var spike := _mesh(_cone_mesh(0.05, 0.28), hair, Vector3((i - 2) * 0.06, 0.2, 0.02 + abs(i - 2) * 0.02), "Hair%d" % i)
+		spike.rotation_degrees = Vector3(-15, 0, (i - 2) * -14)
+		head.add_child(spike)
+	return head
+
 func _build_player() -> void:
 	var p := Player.new()
 	p.name = "Player"
@@ -91,17 +147,57 @@ func _build_player() -> void:
 	var model := Node3D.new()
 	model.name = "Model"
 	p.add_child(model)
-	var body := _mesh(_capsule(0.38, 1.7), _mat(Color(0.18, 0.12, 0.28), 0.6), Vector3(0, 0.9, 0), "Body")
-	model.add_child(body)
-	# Placeholder face marker so facing is readable
-	var visor := _mesh(_box(Vector3(0.36, 0.08, 0.1)), _mat(Color(0.9, 0.2, 0.3)), Vector3(0, 1.5, -0.34), "Visor")
-	model.add_child(visor)
+	var cloth := _mat(Color(0.18, 0.12, 0.28), 0.7)
+	var dark := _mat(Color(0.08, 0.07, 0.1), 0.6)
+	var metal := _mat(Color(0.55, 0.55, 0.62), 0.3, 0.85)
+	var skin := _mat(Color(0.72, 0.62, 0.58), 0.7)
+	var hair := _mat(Color(0.92, 0.92, 0.95), 0.8)
+	var red := _mat(Color(0.9, 0.12, 0.2), 0.3)
+	red.emission_enabled = true
+	red.emission = Color(1.0, 0.1, 0.2)
+	red.emission_energy_multiplier = 1.5
+	model.add_child(_mesh(_capsule(0.26, 0.85), cloth, Vector3(0, 1.28, 0), "Body"))
+	model.add_child(_mesh(_box(Vector3(0.5, 0.35, 0.12)), metal, Vector3(0, 1.38, -0.2), "ChestPlate"))
+	model.add_child(_mesh(_box(Vector3(0.62, 0.1, 0.34)), metal, Vector3(0, 1.62, 0), "Pauldrons"))
+	model.add_child(_mesh(_box(Vector3(0.4, 0.12, 0.3)), dark, Vector3(0, 0.95, 0), "Belt"))
+	var head := _node3D_head(skin, hair, red)
+	model.add_child(head)
+	for side in [-1, 1]:
+		var leg := _node3d("LegL" if side < 0 else "LegR", Vector3(0.14 * side, 0.92, 0))
+		leg.add_child(_mesh(_capsule(0.11, 0.9), dark, Vector3(0, -0.44, 0), "Mesh"))
+		leg.add_child(_mesh(_box(Vector3(0.2, 0.1, 0.32)), metal, Vector3(0, -0.88, -0.05), "Boot"))
+		model.add_child(leg)
+	var arm_l := _node3d("ArmL", Vector3(-0.38, 1.55, 0))
+	arm_l.add_child(_mesh(_capsule(0.085, 0.62), cloth, Vector3(0, -0.3, 0), "Mesh"))
+	model.add_child(arm_l)
+	var cape := _node3d("Cape", Vector3(0, 1.62, 0.18))
+	var cmat := _mat(Color(0.1, 0.06, 0.18), 0.9)
+	cmat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	cape.add_child(_mesh(_box(Vector3(0.62, 1.15, 0.03)), cmat, Vector3(0, -0.58, 0.02), "Mesh"))
+	model.add_child(cape)
+	# Scythe: right arm + shaft + crescent blade, all under the swing pivot
 	var pivot := Node3D.new()
 	pivot.name = "SwordPivot"
-	pivot.position = Vector3(0.45, 1.25, -0.1)
+	pivot.position = Vector3(0.42, 1.4, -0.1)
 	model.add_child(pivot)
-	pivot.add_child(_mesh(_box(Vector3(0.09, 0.05, 1.5)), _mat(Color(0.75, 0.75, 0.85), 0.25, 0.9), Vector3(0, 0, -0.75), "Blade"))
-	pivot.add_child(_mesh(_box(Vector3(0.3, 0.07, 0.1)), _mat(Color(0.3, 0.2, 0.1)), Vector3(0, 0, -0.05), "Guard"))
+	pivot.add_child(_mesh(_capsule(0.085, 0.5), cloth, Vector3(0, -0.12, -0.05), "Arm"))
+	pivot.add_child(_mesh(_box(Vector3(0.055, 0.055, 2.0)), _mat(Color(0.25, 0.16, 0.1), 0.6), Vector3(0, 0, -0.65), "Shaft"))
+	var bladem := _mat(Color(0.8, 0.82, 0.9), 0.2, 0.95)
+	bladem.emission_enabled = true
+	bladem.emission = Color(0.4, 0.15, 0.7)
+	bladem.emission_energy_multiplier = 0.6
+	bladem.cull_mode = BaseMaterial3D.CULL_DISABLED
+	pivot.add_child(_crescent(Vector3(-0.6, 0, -1.65), 0.6, 150.0, 0.11, 0.012, bladem))
+	var anim := CharacterAnim.new()
+	anim.name = "Anim"
+	anim.body_path = NodePath("../..")
+	anim.leg_l_path = NodePath("../LegL")
+	anim.leg_r_path = NodePath("../LegR")
+	anim.arm_l_path = NodePath("../ArmL")
+	anim.cape_path = NodePath("../Cape")
+	anim.head_path = NodePath("../Head")
+	anim.torso_path = NodePath("../Body")
+	model.add_child(anim)
 	model.add_child(_hitbox(4, Vector3(2.4, 1.6, 2.4), Vector3(0, 1.0, -1.2)))
 	_save(p, "res://scenes/characters/player.tscn")
 
@@ -132,13 +228,47 @@ func _build_enemy() -> void:
 	var model := Node3D.new()
 	model.name = "Model"
 	e.add_child(model)
-	model.add_child(_mesh(_capsule(0.45, 1.9), _mat(Color(0.35, 0.33, 0.3), 0.9), Vector3(0, 0.95, 0), "Body"))
-	model.add_child(_mesh(_box(Vector3(0.4, 0.1, 0.1)), _mat(Color(0.9, 0.7, 0.2)), Vector3(0, 1.6, -0.4), "Eyes"))
+	var flesh := _mat(Color(0.30, 0.27, 0.30), 0.9)
+	var rag := _mat(Color(0.2, 0.17, 0.14), 0.95)
+	var bone := _mat(Color(0.75, 0.72, 0.62), 0.8)
+	var glow := _mat(Color(1.0, 0.6, 0.1), 0.3)
+	glow.emission_enabled = true
+	glow.emission = Color(1.0, 0.45, 0.05)
+	glow.emission_energy_multiplier = 2.5
+	model.add_child(_mesh(_capsule(0.32, 1.0), flesh, Vector3(0, 1.2, 0), "Body"))
+	model.add_child(_mesh(_box(Vector3(0.7, 0.5, 0.4)), rag, Vector3(0, 0.95, 0), "Loincloth"))
+	var ehead := _node3d("Head", Vector3(0, 1.8, -0.1))
+	ehead.add_child(_mesh(_sphere(0.19), bone, Vector3.ZERO, "Skull"))
+	ehead.add_child(_mesh(_box(Vector3(0.3, 0.05, 0.05)), glow, Vector3(0, 0.03, -0.17), "Eyes"))
+	for side in [-1, 1]:
+		var horn := _mesh(_cone_mesh(0.05, 0.3), bone, Vector3(0.16 * side, 0.2, 0.0), "Horn")
+		horn.rotation_degrees = Vector3(0, 0, -25 * side)
+		ehead.add_child(horn)
+	model.add_child(ehead)
+	for side in [-1, 1]:
+		var leg := _node3d("LegL" if side < 0 else "LegR", Vector3(0.18 * side, 0.92, 0))
+		leg.add_child(_mesh(_capsule(0.13, 0.95), flesh, Vector3(0, -0.45, 0), "Mesh"))
+		model.add_child(leg)
+	var earm := _node3d("ArmL", Vector3(-0.45, 1.6, 0))
+	earm.add_child(_mesh(_capsule(0.1, 0.9), flesh, Vector3(0, -0.4, 0), "Mesh"))
+	model.add_child(earm)
 	var pivot := Node3D.new()
 	pivot.name = "WeaponPivot"
-	pivot.position = Vector3(0.5, 1.2, -0.1)
+	pivot.position = Vector3(0.5, 1.45, -0.1)
 	model.add_child(pivot)
-	pivot.add_child(_mesh(_box(Vector3(0.14, 0.14, 1.3)), _mat(Color(0.25, 0.2, 0.15)), Vector3(0, 0, -0.65), "Club"))
+	pivot.add_child(_mesh(_capsule(0.1, 0.9), flesh, Vector3(0, -0.2, -0.05), "Arm"))
+	pivot.add_child(_mesh(_box(Vector3(0.16, 0.16, 1.2)), _mat(Color(0.25, 0.2, 0.15), 0.9), Vector3(0, 0, -0.7), "Club"))
+	pivot.add_child(_mesh(_box(Vector3(0.28, 0.28, 0.45)), _mat(Color(0.35, 0.3, 0.28), 0.8, 0.4), Vector3(0, 0, -1.25), "ClubHead"))
+	var eanim := CharacterAnim.new()
+	eanim.name = "Anim"
+	eanim.body_path = NodePath("../..")
+	eanim.leg_l_path = NodePath("../LegL")
+	eanim.leg_r_path = NodePath("../LegR")
+	eanim.arm_l_path = NodePath("../ArmL")
+	eanim.head_path = NodePath("../Head")
+	eanim.torso_path = NodePath("../Body")
+	eanim.hunch = 0.25
+	model.add_child(eanim)
 	model.add_child(_hitbox(2, Vector3(2.2, 1.6, 2.2), Vector3(0, 1.0, -1.2)))
 	_save(e, "res://scenes/enemies/enemy.tscn")
 
@@ -320,6 +450,13 @@ func _build_main() -> void:
 		en.display_name = defs[i][0]
 		en.aggressive = defs[i][1]
 		en.position = defs[i][2]
+		if defs[i][0] == "Husk Brute":
+			en.get_node("Model").scale = Vector3.ONE * 1.35
+			(en.get_node("Health") as HealthComponent).max_health = 160.0
+			(en.get_node("Health") as HealthComponent).max_poise = 70.0
+			en.attack_damage = 24.0
+			en.windup_time = 0.85
+			en.move_speed = 2.9
 		m.add_child(en)
 	m.add_child(load("res://scenes/ui/pause_menu.tscn").instantiate())
 	var hud: Hud = load("res://scenes/ui/hud.tscn").instantiate()

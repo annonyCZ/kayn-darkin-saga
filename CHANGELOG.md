@@ -15,3 +15,4 @@
 
 ## 0.4.0 - 2026-11-22
 - Visual overhaul: procedural terrain, forest, grass, cinematic environment; navmesh from terrain with rock carving.
+- Humanoid placeholder models with procedural animation; Husk Brute.

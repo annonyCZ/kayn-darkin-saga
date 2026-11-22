@@ -1,90 +1,293 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=36 format=4]
 
-[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_76oj4"]
-[ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="2_dyp2m"]
-[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="3_atpat"]
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_dyp2m"]
+[ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="2_atpat"]
+[ext_resource type="Script" path="res://scripts/core/character_anim.gd" id="3_kqtwu"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="4_6eyoc"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kqtwu"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_eojnx"]
 radius = 0.4
 height = 1.8
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6eyoc"]
-albedo_color = Color(0.18, 0.12, 0.28, 1)
-roughness = 0.6
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_eojnx"]
-material = SubResource("StandardMaterial3D_6eyoc")
-radius = 0.38
-height = 1.7
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qgnko"]
-albedo_color = Color(0.9, 0.2, 0.3, 1)
-roughness = 0.8
+albedo_color = Color(0.18, 0.12, 0.28, 1)
+roughness = 0.7
 
-[sub_resource type="BoxMesh" id="BoxMesh_7vyk4"]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_7vyk4"]
 material = SubResource("StandardMaterial3D_qgnko")
-size = Vector3(0.36, 0.08, 0.1)
+radius = 0.26
+height = 0.85
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2l4js"]
-albedo_color = Color(0.75, 0.75, 0.85, 1)
-metallic = 0.9
-roughness = 0.25
+albedo_color = Color(0.55, 0.55, 0.62, 1)
+metallic = 0.85
+roughness = 0.3
 
 [sub_resource type="BoxMesh" id="BoxMesh_jk2m4"]
 material = SubResource("StandardMaterial3D_2l4js")
-size = Vector3(0.09, 0.05, 1.5)
+size = Vector3(0.5, 0.35, 0.12)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xhtjm"]
-albedo_color = Color(0.3, 0.2, 0.1, 1)
+[sub_resource type="BoxMesh" id="BoxMesh_xhtjm"]
+material = SubResource("StandardMaterial3D_2l4js")
+size = Vector3(0.62, 0.1, 0.34)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k4v7y"]
+albedo_color = Color(0.08, 0.07, 0.1, 1)
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_xrqxk"]
+material = SubResource("StandardMaterial3D_k4v7y")
+size = Vector3(0.4, 0.12, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g66nw"]
+albedo_color = Color(0.72, 0.62, 0.58, 1)
+roughness = 0.7
+
+[sub_resource type="SphereMesh" id="SphereMesh_rpnd8"]
+material = SubResource("StandardMaterial3D_g66nw")
+radius = 0.15
+height = 0.3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d6tgn"]
+albedo_color = Color(0.9, 0.12, 0.2, 1)
+roughness = 0.3
+emission_enabled = true
+emission = Color(1, 0.1, 0.2, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_3wg1y"]
+material = SubResource("StandardMaterial3D_d6tgn")
+size = Vector3(0.26, 0.06, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kmyvj"]
+albedo_color = Color(0.92, 0.92, 0.95, 1)
 roughness = 0.8
 
-[sub_resource type="BoxMesh" id="BoxMesh_k4v7y"]
-material = SubResource("StandardMaterial3D_xhtjm")
-size = Vector3(0.3, 0.07, 0.1)
+[sub_resource type="CylinderMesh" id="CylinderMesh_a2luo"]
+material = SubResource("StandardMaterial3D_kmyvj")
+top_radius = 0.0
+bottom_radius = 0.05
+height = 0.28
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_xrqxk"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_eir2k"]
+material = SubResource("StandardMaterial3D_kmyvj")
+top_radius = 0.0
+bottom_radius = 0.05
+height = 0.28
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_inhyd"]
+material = SubResource("StandardMaterial3D_kmyvj")
+top_radius = 0.0
+bottom_radius = 0.05
+height = 0.28
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_wqk1x"]
+material = SubResource("StandardMaterial3D_kmyvj")
+top_radius = 0.0
+bottom_radius = 0.05
+height = 0.28
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_dm10o"]
+material = SubResource("StandardMaterial3D_kmyvj")
+top_radius = 0.0
+bottom_radius = 0.05
+height = 0.28
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_o6auj"]
+material = SubResource("StandardMaterial3D_k4v7y")
+radius = 0.11
+height = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_j8g38"]
+material = SubResource("StandardMaterial3D_2l4js")
+size = Vector3(0.2, 0.1, 0.32)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_tswxa"]
+material = SubResource("StandardMaterial3D_k4v7y")
+radius = 0.11
+height = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_aqa0x"]
+material = SubResource("StandardMaterial3D_2l4js")
+size = Vector3(0.2, 0.1, 0.32)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_yhyq5"]
+material = SubResource("StandardMaterial3D_qgnko")
+radius = 0.085
+height = 0.62
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5jukt"]
+cull_mode = 2
+albedo_color = Color(0.1, 0.06, 0.18, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_vwwfy"]
+material = SubResource("StandardMaterial3D_5jukt")
+size = Vector3(0.62, 1.15, 0.03)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_dg40j"]
+material = SubResource("StandardMaterial3D_qgnko")
+radius = 0.085
+height = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7xgtv"]
+albedo_color = Color(0.25, 0.16, 0.1, 1)
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_6rclf"]
+material = SubResource("StandardMaterial3D_7xgtv")
+size = Vector3(0.055, 0.055, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s0anf"]
+cull_mode = 2
+albedo_color = Color(0.8, 0.82, 0.9, 1)
+metallic = 0.95
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.4, 0.15, 0.7, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_s1x7u"]
+_surfaces = [{
+"aabb": AABB(-1.1196153, -0.012, -2.3221967, 1.2296152, 0.024, 0.67219675),
+"format": 34359738375,
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 168,
+"vertex_data": PackedByteArray("qEfhPaabRDwzM9O/CM3GPaabRDwRFeS/sEfhvaabRDwzM9O/CM3GPaabRDwRFeS/SKXxvaabRDyt396/sEfhvaabRDwzM9O/qEfhPaabRLwzM9O/sEfhvaabRLwzM9O/CM3GPaabRLwRFeS/CM3GPaabRLwRFeS/sEfhvaabRLwzM9O/SKXxvaabRLyt396/CM3GPaabRDwRFeS/YPhwPaabRDwWTPS/SKXxvaabRDyt396/YPhwPaabRDwWTPS/WC8RvqabRDwbOOq/SKXxvaabRDyt396/CM3GPaabRLwRFeS/SKXxvaabRLyt396/YPhwPaabRLwWTPS/YPhwPaabRLwWTPS/SKXxvaabRLyt396/WC8RvqabRLwbOOq/YPhwPaabRDwWTPS/AFZLu6abRDyCmgHAWC8RvqabRDwbOOq/AFZLu6abRDyCmgHAECs5vqabRDy86fS/WC8RvqabRDwbOOq/YPhwPaabRLwWTPS/WC8RvqabRLwbOOq/AFZLu6abRLyCmgHAAFZLu6abRLyCmgHAWC8RvqabRLwbOOq/ECs5vqabRLy86fS/AFZLu6abRDyCmgHAaF2wvaabRDy8HQjAECs5vqabRDy86fS/aF2wvaabRDy8HQjA6tdvvqabRDxopP6/ECs5vqabRDy86fS/AFZLu6abRLyCmgHAECs5vqabRLy86fS/aF2wvaabRLy8HQjAaF2wvaabRLy8HQjAECs5vqabRLy86fS/6tdvvqabRLxopP6/aF2wvaabRDy8HQjAWjM/vqabRDw9cA3A6tdvvqabRDxopP6/WjM/vqabRDw9cA3A4/SZvqabRDwAjgPA6tdvvqabRDxopP6/aF2wvaabRLy8HQjA6tdvvqabRLxopP6/WjM/vqabRLw9cA3AWjM/vqabRLw9cA3A6tdvvqabRLxopP6/4/SZvqabRLwAjgPAWjM/vqabRDw9cA3AgfaZvqabRDwBYBHA4/SZvqabRDwAjgPAgfaZvqabRDwBYBHA5NvBvqabRDz3BAfA4/SZvqabRDwAjgPAWjM/vqabRLw9cA3A4/SZvqabRLwAjgPAgfaZvqabRLwBYBHAgfaZvqabRLwBYBHA4/SZvqabRLwAjgPA5NvBvqabRLz3BAfAgfaZvqabRDwBYBHAH8LYvqabRDypyhPA5NvBvqabRDz3BAfAH8LYvqabRDypyhPAkp/uvqabRDxqlwnA5NvBvqabRDz3BAfAgfaZvqabRLwBYBHA5NvBvqabRLz3BAfAH8LYvqabRLypyhPAH8LYvqabRLypyhPA5NvBvqabRLz3BAfAkp/uvqabRLxqlwnAH8LYvqabRDypyhPASLQMv6abRDzfnhTAkp/uvqabRDxqlwnASLQMv6abRDzfnhTA6YkPv6abRDwnKgvAkp/uvqabRDxqlwnAH8LYvqabRLypyhPAkp/uvqabRLxqlwnASLQMv6abRLzfnhTASLQMv6abRLzfnhTAkp/uvqabRLxqlwnA6YkPv6abRLwnKgvASLQMv6abRDzfnhTAzqUsv6abRDz63BPA6YkPv6abRDwnKgvAzqUsv6abRDz63BPApPIov6abRDxmpwvA6YkPv6abRDwnKgvASLQMv6abRLzfnhTA6YkPv6abRLwnKgvAzqUsv6abRLz63BPAzqUsv6abRLz63BPA6YkPv6abRLwnKgvApPIov6abRLxmpwvAzqUsv6abRDz63BPAmvBKv6abRDzGlhHApPIov6abRDxmpwvAmvBKv6abRDzGlhHAF89Cv6abRDzA/wrApPIov6abRDxmpwvAzqUsv6abRLz63BPApPIov6abRLxmpwvAmvBKv6abRLzGlhHAmvBKv6abRLzGlhHApPIov6abRLxmpwvAF89Cv6abRLzA/wrAmvBKv6abRDzGlhHAU2hmv6abRDyG7g3AF89Cv6abRDzA/wrAU2hmv6abRDyG7g3AYFZcv6abRDwYKwnAF89Cv6abRDzA/wrAmvBKv6abRLzGlhHAF89Cv6abRLzA/wrAU2hmv6abRLyG7g3AU2hmv6abRLyG7g3AF89Cv6abRLzA/wrAYFZcv6abRLwYKwnAU2hmv6abRDyG7g3AsQZ+v6abRDwlFQnAYFZcv6abRDwYKwnAsQZ+v6abRDwlFQnAvrV0v6abRDx9KQbAYFZcv6abRDwYKwnAU2hmv6abRLyG7g3AYFZcv6abRLwYKwnAsQZ+v6abRLwlFQnAsQZ+v6abRLwlFQnAYFZcv6abRLwYKwnAvrV0v6abRLx9KQbAsQZ+v6abRDwlFQnAfnuIv6abRDzKRwPAvrV0v6abRDx9KQbAfnuIv6abRDzKRwPAxYqFv6abRDznAwLAvrV0v6abRDx9KQbAsQZ+v6abRLwlFQnAvrV0v6abRLx9KQbAfnuIv6abRLzKRwPAfnuIv6abRLzKRwPAvrV0v6abRLx9KQbAxYqFv6abRLznAwLAfnuIv6abRDzKRwPAjk+Pv6abRDyamfm/xYqFv6abRDznAwLAjk+Pv6abRDyamfm/jk+Pv6abRDyamfm/xYqFv6abRDznAwLAfnuIv6abRLzKRwPAxYqFv6abRLznAwLAjk+Pv6abRLyamfm/jk+Pv6abRLyamfm/xYqFv6abRLznAwLAjk+Pv6abRLyamfm//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
+}]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_c3kfx"]
 size = Vector3(2.4, 1.6, 2.4)
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
 collision_mask = 5
-script = ExtResource("1_76oj4")
+script = ExtResource("1_dyp2m")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("CapsuleShape3D_kqtwu")
+shape = SubResource("CapsuleShape3D_eojnx")
 
 [node name="Health" type="Node" parent="."]
-script = ExtResource("2_dyp2m")
+script = ExtResource("2_atpat")
 max_health = 120.0
 max_poise = 45.0
 
 [node name="Model" type="Node3D" parent="."]
 
 [node name="Body" type="MeshInstance3D" parent="Model"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("CapsuleMesh_eojnx")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.28, 0)
+mesh = SubResource("CapsuleMesh_7vyk4")
 
-[node name="Visor" type="MeshInstance3D" parent="Model"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -0.34)
-mesh = SubResource("BoxMesh_7vyk4")
-
-[node name="SwordPivot" type="Node3D" parent="Model"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 1.25, -0.1)
-
-[node name="Blade" type="MeshInstance3D" parent="Model/SwordPivot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.75)
+[node name="ChestPlate" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38, -0.2)
 mesh = SubResource("BoxMesh_jk2m4")
 
-[node name="Guard" type="MeshInstance3D" parent="Model/SwordPivot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.05)
-mesh = SubResource("BoxMesh_k4v7y")
+[node name="Pauldrons" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, 0)
+mesh = SubResource("BoxMesh_xhtjm")
+
+[node name="Belt" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("BoxMesh_xrqxk")
+
+[node name="Head" type="Node3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.82, 0)
+
+[node name="Skull" type="MeshInstance3D" parent="Model/Head"]
+mesh = SubResource("SphereMesh_rpnd8")
+
+[node name="Visor" type="MeshInstance3D" parent="Model/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.12)
+mesh = SubResource("BoxMesh_3wg1y")
+
+[node name="Hair0" type="MeshInstance3D" parent="Model/Head"]
+transform = Transform3D(0.88294756, -0.46947157, 0, 0.4534747, 0.8528618, 0.25881904, -0.12150818, -0.22852364, 0.9659258, -0.12, 0.2, 0.06)
+mesh = SubResource("CylinderMesh_a2luo")
+
+[node name="Hair1" type="MeshInstance3D" parent="Model/Head"]
+transform = Transform3D(0.9702957, -0.2419219, 0, 0.23367861, 0.9372337, 0.25881904, -0.062613994, -0.251131, 0.9659258, -0.06, 0.2, 0.04)
+mesh = SubResource("CylinderMesh_eir2k")
+
+[node name="Hair2" type="MeshInstance3D" parent="Model/Head"]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.25881904, 0, -0.25881904, 0.9659258, 0, 0.2, 0.02)
+mesh = SubResource("CylinderMesh_inhyd")
+
+[node name="Hair3" type="MeshInstance3D" parent="Model/Head"]
+transform = Transform3D(0.9702957, 0.2419219, 0, -0.23367861, 0.9372337, 0.25881904, 0.062613994, -0.251131, 0.9659258, 0.06, 0.2, 0.04)
+mesh = SubResource("CylinderMesh_wqk1x")
+
+[node name="Hair4" type="MeshInstance3D" parent="Model/Head"]
+transform = Transform3D(0.88294756, 0.46947157, 0, -0.4534747, 0.8528618, 0.25881904, 0.12150818, -0.22852364, 0.9659258, 0.12, 0.2, 0.06)
+mesh = SubResource("CylinderMesh_dm10o")
+
+[node name="LegL" type="Node3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14, 0.92, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Model/LegL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.44, 0)
+mesh = SubResource("CapsuleMesh_o6auj")
+
+[node name="Boot" type="MeshInstance3D" parent="Model/LegL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.88, -0.05)
+mesh = SubResource("BoxMesh_j8g38")
+
+[node name="LegR" type="Node3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14, 0.92, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Model/LegR"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.44, 0)
+mesh = SubResource("CapsuleMesh_tswxa")
+
+[node name="Boot" type="MeshInstance3D" parent="Model/LegR"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.88, -0.05)
+mesh = SubResource("BoxMesh_aqa0x")
+
+[node name="ArmL" type="Node3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.38, 1.55, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Model/ArmL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+mesh = SubResource("CapsuleMesh_yhyq5")
+
+[node name="Cape" type="Node3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, 0.18)
+
+[node name="Mesh" type="MeshInstance3D" parent="Model/Cape"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.58, 0.02)
+mesh = SubResource("BoxMesh_vwwfy")
+
+[node name="SwordPivot" type="Node3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 1.4, -0.1)
+
+[node name="Arm" type="MeshInstance3D" parent="Model/SwordPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.12, -0.05)
+mesh = SubResource("CapsuleMesh_dg40j")
+
+[node name="Shaft" type="MeshInstance3D" parent="Model/SwordPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.65)
+mesh = SubResource("BoxMesh_6rclf")
+
+[node name="Blade" type="MeshInstance3D" parent="Model/SwordPivot"]
+material_override = SubResource("StandardMaterial3D_s0anf")
+mesh = SubResource("ArrayMesh_s1x7u")
+
+[node name="Anim" type="Node" parent="Model"]
+script = ExtResource("3_kqtwu")
+body_path = NodePath("../..")
+leg_l_path = NodePath("../LegL")
+leg_r_path = NodePath("../LegR")
+arm_l_path = NodePath("../ArmL")
+cape_path = NodePath("../Cape")
+head_path = NodePath("../Head")
+torso_path = NodePath("../Body")
 
 [node name="Hitbox" type="Area3D" parent="Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -1.2)
 collision_layer = 0
 collision_mask = 4
-script = ExtResource("3_atpat")
+script = ExtResource("4_6eyoc")
 
 [node name="@CollisionShape3D@2" type="CollisionShape3D" parent="Model/Hitbox"]
-shape = SubResource("BoxShape3D_xrqxk")
+shape = SubResource("BoxShape3D_c3kfx")

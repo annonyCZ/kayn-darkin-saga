@@ -74,25 +74,25 @@ script = ExtResource("2_p77yg")
 [node name="Wall0" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, -108)
 
-[node name="@CollisionShape3D@5" type="CollisionShape3D" parent="Wall0"]
+[node name="@CollisionShape3D@6" type="CollisionShape3D" parent="Wall0"]
 shape = SubResource("BoxShape3D_o4ynd")
 
 [node name="Wall1" type="StaticBody3D" parent="."]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -108, 40, 4.72083e-06)
 
-[node name="@CollisionShape3D@6" type="CollisionShape3D" parent="Wall1"]
+[node name="@CollisionShape3D@7" type="CollisionShape3D" parent="Wall1"]
 shape = SubResource("BoxShape3D_wgcdj")
 
 [node name="Wall2" type="StaticBody3D" parent="."]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 9.44166e-06, 40, 108)
 
-[node name="@CollisionShape3D@7" type="CollisionShape3D" parent="Wall2"]
+[node name="@CollisionShape3D@8" type="CollisionShape3D" parent="Wall2"]
 shape = SubResource("BoxShape3D_d0fhh")
 
 [node name="Wall3" type="StaticBody3D" parent="."]
 transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 108, 40, -1.2878871e-06)
 
-[node name="@CollisionShape3D@8" type="CollisionShape3D" parent="Wall3"]
+[node name="@CollisionShape3D@9" type="CollisionShape3D" parent="Wall3"]
 shape = SubResource("BoxShape3D_8jdsg")
 
 [node name="Forest" type="Node3D" parent="."]
