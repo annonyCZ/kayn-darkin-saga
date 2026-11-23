@@ -12,6 +12,9 @@ var _death: Label
 var _hint: Label
 var _mouse_hint: Label
 var _path_label: Label
+var _fx: ColorRect
+var _hurt: float = 0.0
+var _last_hp: float = 1.0
 var _ability_bars: Dictionary = {}
 var _ability_labels: Dictionary = {}
 
@@ -21,6 +24,14 @@ func _ready() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+
+	_fx = ColorRect.new()
+	_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var fxm := ShaderMaterial.new()
+	fxm.shader = load("res://assets/shaders/screen_fx.gdshader")
+	_fx.material = fxm
+	root.add_child(_fx)
 
 	var tl := VBoxContainer.new()
 	tl.position = Vector2(24, 20)
@@ -98,8 +109,12 @@ func _bar(color: Color, height: int) -> ProgressBar:
 	b.value = 1.0
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = color
+	fill.set_corner_radius_all(1)
 	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0, 0, 0, 0.6)
+	bg.bg_color = Color(0.03, 0.02, 0.02, 0.75)
+	bg.border_color = Color(0.78, 0.62, 0.3, 0.9)     # thin gold frame
+	bg.set_border_width_all(2)
+	bg.set_corner_radius_all(2)
 	b.add_theme_stylebox_override("fill", fill)
 	b.add_theme_stylebox_override("background", bg)
 	return b
@@ -108,7 +123,15 @@ func _process(_delta: float) -> void:
 	if _player == null or not is_instance_valid(_player):
 		_player = get_tree().get_first_node_in_group("player") as Player
 		return
-	_hp.value = _player.health.fraction()
+	var frac := _player.health.fraction()
+	if frac < _last_hp - 0.001:
+		_hurt = 1.0
+	_last_hp = frac
+	_hurt = maxf(0.0, _hurt - get_process_delta_time() * 2.5)
+	var sm := _fx.material as ShaderMaterial
+	sm.set_shader_parameter("hurt", _hurt)
+	sm.set_shader_parameter("low_health", clampf((0.35 - frac) / 0.35, 0.0, 1.0))
+	_hp.value = frac
 	_st.value = _player.stamina / _player.max_stamina
 	_path_label.text = String(_player.profile["name"])
 	for key: String in _ability_bars:

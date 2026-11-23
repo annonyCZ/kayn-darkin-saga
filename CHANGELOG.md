@@ -17,3 +17,4 @@
 - Visual overhaul: procedural terrain, forest, grass, cinematic environment; navmesh from terrain with rock carving.
 - Humanoid placeholder models with procedural animation; Husk Brute.
 - Synthesized audio, VFX, weapon trail, lock-on marker.
+- HUD frames + screen FX overlay; AI character pipeline doc; 74 tests.

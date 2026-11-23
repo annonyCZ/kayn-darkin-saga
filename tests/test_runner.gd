@@ -326,6 +326,18 @@ func _ready() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_save.cfg"))
 	gs.reset_campaign()
 
+	print("== Audio and VFX")
+	for sn in ["swing", "hit", "parry", "block", "slam", "growl", "death", "dodge", "wind", "drone"]:
+		var w := Sfx.get_stream(sn)
+		check(w != null and w.data.size() > 1000, "synthesized sound '%s' has audio data" % sn)
+	var before_fx := get_tree().root.get_child_count()
+	Vfx.spark(Vector3(0, 1, 0))
+	Vfx.shockwave(Vector3.ZERO, 4.0)
+	Vfx.damage_number(Vector3(0, 2, 0), 12.0)
+	check(get_tree().root.get_child_count() == before_fx + 3, "VFX helpers spawn effect nodes")
+	var hud_fx := main.get_node("Hud")._fx as ColorRect
+	check(hud_fx != null and hud_fx.material is ShaderMaterial, "HUD has the screen FX overlay")
+
 	print("== Pause menu")
 	var pm := main.get_node("PauseMenu") as PauseMenu
 	pm.toggle()
