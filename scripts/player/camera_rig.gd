@@ -80,6 +80,8 @@ func _process(delta: float) -> void:
 	global_position = global_position.lerp(goal, clampf(follow_smoothing * delta, 0.0, 1.0))
 	_yaw_node.rotation.y = yaw
 	_pitch_node.rotation.x = pitch
+	var want_fov := 70.0 + (8.0 if follow_target.get("is_sprinting") == true else 0.0)
+	camera.fov = lerpf(camera.fov, want_fov, clampf(6.0 * delta, 0.0, 1.0))
 	# Shake
 	if trauma > 0.0:
 		trauma = maxf(0.0, trauma - delta * 1.6)

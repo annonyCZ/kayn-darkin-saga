@@ -2,6 +2,7 @@ extends Node
 ## Wires the camera rig to the player when the main scene starts.
 
 func _ready() -> void:
+	Sfx.start_ambience()
 	var gs := get_node_or_null("/root/GameState")
 	if gs:
 		gs.load_game()

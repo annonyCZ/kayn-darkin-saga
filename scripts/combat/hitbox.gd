@@ -22,6 +22,9 @@ func begin_swing(dmg: float, poise_dmg: float) -> void:
 	_active = true
 	monitoring = true
 
+func is_active() -> bool:
+	return _active
+
 func end_swing() -> void:
 	_active = false
 	monitoring = false

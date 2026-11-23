@@ -188,6 +188,10 @@ func _build_player() -> void:
 	bladem.emission_energy_multiplier = 0.6
 	bladem.cull_mode = BaseMaterial3D.CULL_DISABLED
 	pivot.add_child(_crescent(Vector3(-0.6, 0, -1.65), 0.6, 150.0, 0.11, 0.012, bladem))
+	var trail := WeaponTrail.new()
+	trail.name = "Trail"
+	trail.tracked_path = NodePath("../SwordPivot")
+	model.add_child(trail)
 	var anim := CharacterAnim.new()
 	anim.name = "Anim"
 	anim.body_path = NodePath("../..")

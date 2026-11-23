@@ -147,6 +147,7 @@ func _brake(delta: float) -> void:
 
 func _start_windup() -> void:
 	_set_state(State.WINDUP)
+	Sfx.play("growl", global_position, -2.0)
 	# Telegraph: weapon raised + red glow ramping up
 	if _tween: _tween.kill()
 	_tween = create_tween().set_parallel(true)
@@ -157,6 +158,7 @@ func _start_windup() -> void:
 
 func _strike() -> void:
 	_set_state(State.ATTACK)
+	Sfx.play("swing", global_position, -5.0, 0.7)
 	hitbox.begin_swing(attack_damage, attack_poise_damage)
 	if _tween: _tween.kill()
 	_tween = create_tween()
@@ -194,6 +196,9 @@ func _on_died() -> void:
 	_rest_weapon()
 	_set_state(State.DEAD)
 	remove_from_group("enemy")
+	Sfx.play("death", global_position, 0.0)
+	Vfx.spark(global_position + Vector3.UP, Color(0.9, 0.3, 0.15), 28, 6.0)
+	Vfx.dust(global_position, 12, 1.2)
 	$CollisionShape3D.set_deferred("disabled", true)
 	var t := create_tween()
 	t.tween_property(model, "rotation_degrees:x", -85.0, 0.4)

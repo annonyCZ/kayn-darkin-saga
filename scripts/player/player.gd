@@ -74,6 +74,11 @@ var _base_max_health: float = 0.0
 @onready var sword_pivot: Node3D = $Model/SwordPivot
 @onready var hitbox: Hitbox = $Model/Hitbox
 @onready var body_mesh: MeshInstance3D = $Model/Body
+@onready var trail: WeaponTrail = get_node_or_null("Model/Trail")
+var is_sprinting: bool = false
+var _lock_marker: MeshInstance3D
+var _prev_vy: float = 0.0
+var _was_on_floor: bool = true
 
 func _ready() -> void:
 	add_to_group("player")
@@ -85,6 +90,7 @@ func _ready() -> void:
 	health.died.connect(_on_died)
 	health.intercept = _intercept_damage
 	_base_max_health = health.max_health
+	_make_lock_marker()
 	_reset_sword()
 	var gs := get_node_or_null("/root/GameState")
 	if gs:
@@ -151,6 +157,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	_state_t += delta
+	is_sprinting = false
 	_combo_timer += delta
 	_update_stamina(delta)
 	for k: String in _cooldowns:
@@ -166,7 +173,13 @@ func _physics_process(delta: float) -> void:
 		State.DEAD: _dead(delta)
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
+	_prev_vy = velocity.y
 	move_and_slide()
+	if is_on_floor() and not _was_on_floor and _prev_vy < -7.0:
+		Vfx.dust(global_position, 8, 1.0)
+		Sfx.play("block", global_position, -10.0, 0.7)
+	_was_on_floor = is_on_floor()
+	_update_lock_marker()
 
 # ---------------------------------------------------------------- locomotion
 func _locomotion(delta: float) -> void:
@@ -183,6 +196,7 @@ func _locomotion(delta: float) -> void:
 	var speed := (SPRINT_SPEED if sprinting else RUN_SPEED) * float(profile["speed_mult"])
 	if blocking:
 		speed *= 0.5
+	is_sprinting = sprinting
 	if sprinting:
 		_spend_stamina(SPRINT_COST_PER_SEC * delta)
 	var target_v := dir * speed
@@ -254,6 +268,8 @@ func _start_dodge(dir: Vector3) -> void:
 	if dir != Vector3.ZERO:
 		_snap_face(_dodge_dir)
 	health.invulnerable = true
+	Sfx.play("dodge", global_position, -6.0)
+	Vfx.dust(global_position + Vector3.UP * 0.1, 7, 0.8)
 	_set_state(State.DODGE)
 	_pose_dodge()
 
@@ -320,6 +336,7 @@ func _start_attack(name: String) -> void:
 		dir = _model_forward()
 	_snap_face(dir)
 	_set_state(State.ATTACK)
+	Sfx.play("swing", global_position, -3.0, 0.8 if name == "heavy" or name == "slam" else 1.0)
 	_animate_swing(atk)
 
 func _attack(delta: float) -> void:
@@ -343,11 +360,13 @@ func _attack(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, 40.0 * delta)
 	if _attack_t >= windup and not _attack_swing_started:
 		_attack_swing_started = true
+		if trail: trail.emitting = true
 		hitbox.begin_swing(float(atk["dmg"]), float(atk["poise"]))
 		if atk.has("aoe"):
 			_apply_aoe(float(atk["aoe"]), float(atk["dmg"]), float(atk["poise"]))
 	if _attack_t >= windup + active and _attack_swing_started:
 		_attack_swing_started = false
+		if trail: trail.emitting = false
 		hitbox.end_swing()
 		if atk.get("iframes", false):
 			health.invulnerable = false
@@ -365,6 +384,12 @@ func _attack(delta: float) -> void:
 		_finish_attack()
 
 func _apply_aoe(radius: float, dmg: float, poise_dmg: float) -> void:
+	Sfx.play("slam", global_position, 2.0)
+	Vfx.shockwave(global_position, radius)
+	Vfx.dust(global_position, 20, radius * 0.5)
+	var r0 := _get_rig()
+	if r0:
+		r0.add_trauma(0.6)
 	for n in get_tree().get_nodes_in_group("enemy"):
 		var e := n as Node3D
 		if e and global_position.distance_to(e.global_position) <= radius:
@@ -374,6 +399,7 @@ func _apply_aoe(radius: float, dmg: float, poise_dmg: float) -> void:
 
 func _finish_attack(reset_state: bool = true) -> void:
 	hitbox.end_swing()
+	if trail: trail.emitting = false
 	if _attack_name in ["dashslash"]:
 		health.invulnerable = false
 	_combo_timer = 0.0
@@ -403,7 +429,11 @@ func _reset_sword() -> void:
 		_tween.kill()
 	sword_pivot.rotation_degrees = Vector3(0.0, 40.0, 0.0)
 
-func _on_hit_landed(_target: Node, amount: float) -> void:
+func _on_hit_landed(target: Node, amount: float) -> void:
+	var tpos := (target as Node3D).global_position + Vector3.UP * 1.2 if target is Node3D else global_position
+	Vfx.spark(tpos, Color(1.0, 0.75, 0.35))
+	Vfx.damage_number(tpos + Vector3.UP * 0.8, amount)
+	Sfx.play("hit", tpos, 0.0)
 	if float(profile["lifesteal"]) > 0.0:
 		health.heal(amount * float(profile["lifesteal"]))
 	# hit-stop + camera shake for impact feedback
@@ -432,18 +462,26 @@ func _intercept_damage(amount: float, poise: float, source: Node) -> Dictionary:
 		var r := _get_rig()
 		if r:
 			r.add_trauma(0.4)
+		Sfx.play("parry", global_position, 2.0)
+		Vfx.spark(global_position + _model_forward() * 0.8 + Vector3.UP * 1.3, Color(0.6, 0.85, 1.0), 24, 9.0)
 		parried.emit(source)
 		return {"cancel": true}
 	var cost := poise * 0.8
 	if stamina >= cost:
 		_spend_stamina(cost)
+		Sfx.play("block", global_position, 0.0)
+		Vfx.spark(global_position + _model_forward() * 0.8 + Vector3.UP * 1.3, Color(1.0, 0.9, 0.6), 8, 4.0)
 		return {"amount": amount * 0.15, "poise": 0.0}
 	stamina = 0.0
 	guard_broken.emit()
 	return {"poise": 9999.0}
 
 # ---------------------------------------------------------------- damage states
-func _on_damaged(_amount: float, _source: Node) -> void:
+func _on_damaged(amount: float, _source: Node) -> void:
+	if amount > 0.0:
+		Sfx.play("hit", global_position, 2.0, 0.8)
+		Vfx.spark(global_position + Vector3.UP * 1.3, Color(1.0, 0.2, 0.15), 12, 5.0)
+		Vfx.damage_number(global_position + Vector3.UP * 2.2, amount, Color(1.0, 0.3, 0.3))
 	var r := _get_rig()
 	if r:
 		r.add_trauma(0.5)
@@ -458,6 +496,7 @@ func _on_staggered() -> void:
 	if state == State.DEAD:
 		return
 	hitbox.end_swing()
+	if trail: trail.emitting = false
 	_reset_sword()
 	_end_pose()
 	_set_state(State.STAGGER)
@@ -538,3 +577,32 @@ func _set_lock(t: Node3D) -> void:
 	if r:
 		r.lock_target = t
 	lock_target_changed.emit(t)
+
+# ---------------------------------------------------------------- lock-on marker
+func _make_lock_marker() -> void:
+	_lock_marker = MeshInstance3D.new()
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.2
+	cone.bottom_radius = 0.0
+	cone.height = 0.38
+	cone.radial_segments = 4
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_color = Color(1.0, 0.8, 0.3)
+	m.no_depth_test = true
+	cone.material = m
+	_lock_marker.mesh = cone
+	_lock_marker.top_level = true
+	_lock_marker.visible = false
+	_lock_marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_lock_marker)
+
+func _update_lock_marker() -> void:
+	if _lock_marker == null:
+		return
+	var ok := lock_target != null and is_instance_valid(lock_target)
+	_lock_marker.visible = ok
+	if ok:
+		var top: float = 2.75 * (float((lock_target.get_node("Model") as Node3D).scale.y) if lock_target.has_node("Model") else 1.0)
+		_lock_marker.global_position = lock_target.global_position + Vector3.UP * (top + sin(Time.get_ticks_msec() * 0.006) * 0.08)
+		_lock_marker.rotation.y += 0.05

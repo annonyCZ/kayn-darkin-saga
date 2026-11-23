@@ -14,6 +14,7 @@
 - Rocks in the arena are solid (wrapped in StaticBody3D - the demo scenes only carried a shape). Navmesh baked at load; enemies use NavigationAgent3D to path around obstacles. Pause menu (Esc).
 - Visual pass 1: procedural terrain (flat arena plateau + hills, slope-blended grass/rock shader), 420 low-poly pines with trunk colliders, ~16k wind-swayed grass clumps, golden-hour lighting, ACES tonemap, bloom, SSAO, fog + volumetric fog. Navmesh now baked from terrain; rocks carve holes via NavigationObstacle3D.
 - Visual pass 2: humanoid Kayn (white hair, visor, plate, cape, crescent scythe) and horned Husk enemies built from primitives with procedural locomotion animation (scripts/core/character_anim.gd); Husk Brute variant (bigger, tougher).
+- Visual pass 3: procedurally synthesized SFX + ambient wind/drone (scripts/core/sfx.gd), sparks/dust/shockwave/damage numbers (vfx.gd), scythe trail, lock-on marker, sprint FOV kick.
 - Test arena: real scene using CC0 rock models and ground texture from the Terrain3D demo.
 - Rendering verified once with xvfb + OpenGL (screenshot looked correct).
 
