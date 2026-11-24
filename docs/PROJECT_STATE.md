@@ -1,8 +1,8 @@
-# Project State (updated 2026-11-18)
+# Project State (updated 2026-11-24)
 
 **Engine:** Godot 4.5 (verified headless). Original project targeted 4.7; `config/features` set to 4.5 so it opens in 4.5+.
 
-## Done and verified (74 automated checks pass)
+## Done and verified (117 automated checks pass)
 - Phase 0: project initialised, folder structure, git, docs.
 - Milestone 1 playable prototype: third-person over-the-shoulder camera (collision, lock-on framing, shake),
   camera-relative movement (run/sprint/jump), stamina, dodge with i-frames, 3-hit light combo + heavy with
@@ -16,12 +16,13 @@
 - Visual pass 2: humanoid Kayn (white hair, visor, plate, cape, crescent scythe) and horned Husk enemies built from primitives with procedural locomotion animation (scripts/core/character_anim.gd); Husk Brute variant (bigger, tougher).
 - Visual pass 3: procedurally synthesized SFX + ambient wind/drone (scripts/core/sfx.gd), sparks/dust/shockwave/damage numbers (vfx.gd), scythe trail, lock-on marker, sprint FOV kick.
 - HUD polish: gold-framed bars, cinematic screen overlay (vignette, grain, hurt flash, low-health pulse). Prompts and pipeline for creating an original hero model with AI: docs/CHARACTER_AI_PROMPTS.md.
+- v0.5.0 main menu: Czech menu scene (`scenes/ui/main_menu.tscn`, scripts in `scripts/ui/menu/`) is the start scene. Continue / New game / Load (3 slots) / Settings (graphics, audio, controls) / Gallery / Credits / Quit with confirmation. Settings are applied live and saved; save slots live in GameState. Visual verification: software-GL screenshots (xvfb) plus end-to-end flow check menu -> game -> pause -> menu.
 - Test arena: real scene using CC0 rock models and ground texture from the Terrain3D demo.
 - Rendering verified once with xvfb + OpenGL (screenshot looked correct).
 
 ## Placeholder / not done
 - All characters are capsule placeholders; animation is procedural tweening (no skeletal animation).
-- No audio, VFX, main menu, full save/load (only the path choice is saved), inventory, quests, NPCs, bosses.
+- No recorded audio/music, full save/load (saves only hold the Kayn path choice; no position/inventory yet), inventory, quests, NPCs, bosses.
 - Phases 3 (partial: gamepad untested, no walk toggle), 4 (partial: charged attacks missing), 5-14 not started.
 - Terrain3D addon is NOT in the repo (gitignored); install it for Phase 7 world terrain.
 - Kayn paths differ by stat multipliers only; unique movesets, abilities, animations and VFX per path are still to do. Path-specific narrative consequences not written.

@@ -6,4 +6,9 @@
 | Crystal, Tunnel models/materials | assets/environments/terrain3d_demo | glb/tres | unused yet | Terrain3D demo | unused |
 | Terrain3D | addons/terrain_3d (not committed) | GDExtension | future terrain | MIT | optional, install manually |
 | Player / enemy models | scenes/characters, scenes/enemies | primitive meshes | gameplay | original, generated | TEMPORARY placeholder |
-| Audio, VFX, animations | - | - | - | - | MISSING |
+| Main-menu key art | assets/ui/menu/kayn_menu_art.jpg | jpg | menu background | Supplied by the project author (crop of their own menu mock-up; baked-in menu text and key hints removed, character untouched). Generator/licence of the image not documented - author to confirm rights | in use, rights to be confirmed by author |
+| Concept art (3 images) | assets/ui/gallery/*.jpg | jpg | gallery screen | Supplied by the project author (AI-assisted concepts of the original Kayn design). Rights to be confirmed by author | in use, rights to be confirmed by author |
+| Cinzel | assets/ui/fonts/Cinzel.ttf (+OFL-Cinzel.txt) | ttf | menu titles | SIL OFL 1.1, Google Fonts | approved |
+| Cormorant Garamond | assets/ui/fonts/CormorantGaramond.ttf (+OFL-CormorantGaramond.txt) | ttf | menu text | SIL OFL 1.1, Google Fonts | approved |
+| Menu shaders, UI sounds | assets/shaders/menu_*.gdshader, scripts/core/sfx.gd | code | menu fx | original, procedural | approved |
+| Audio (recorded), animations | - | - | - | - | - | MISSING |

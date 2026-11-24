@@ -6,7 +6,7 @@ Open-source 3D third-person action RPG built with **Godot 4** (GDScript). Fan pr
 ## Status: early prototype (v0.3.0)
 Playable test arena: over-the-shoulder camera, lock-on, run/sprint/jump, dodge with i-frames, light combo + heavy,
 block and parry, two abilities with cooldowns, Kayn's permanent Shadow Assassin / Rhaast choice at an altar (press G), poise/stagger, telegraphed melee enemies, HUD, rebindable controls.
-Characters are placeholders; no audio, story, inventory, saves or co-op yet. See [docs/DEVELOPMENT_ROADMAP.md](docs/DEVELOPMENT_ROADMAP.md).
+Starts in a Czech main menu (continue / new game / load / settings / gallery / credits / quit). Characters are placeholders; no recorded audio, story, inventory or co-op yet; saves hold only the path choice. See [docs/DEVELOPMENT_ROADMAP.md](docs/DEVELOPMENT_ROADMAP.md).
 
 ## Run
 1. Install Godot 4.5 or newer (standard build, not .NET).
@@ -21,7 +21,9 @@ Characters are placeholders; no audio, story, inventory, saves or co-op yet. See
 | Abilities (Shadow Step, Ground Slam) | Q, E | RB, D-pad down |
 | Lock-on, switch target | Tab, mouse wheel | R3, D-pad left/right |
 | Interact (altar) | G | D-pad up |
-| Pause | Esc | Start |
+| Pause (Resume / Main menu / Quit) | Esc | Start |
+
+In the main menu use mouse, arrow keys + Enter, or D-pad + A; Esc goes back. All key bindings can be changed in Nastavení > Ovládání.
 
 ## Tests
 ```

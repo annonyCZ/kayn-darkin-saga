@@ -36,6 +36,8 @@ static func play(sfx_name: String, pos: Variant = null, volume_db: float = 0.0, 
 		p2.pitch_scale = pitch
 		player = p2
 	player.process_mode = Node.PROCESS_MODE_ALWAYS
+	if AudioServer.get_bus_index("SFX") != -1:
+		player.bus = "SFX"
 	tree.root.add_child.call_deferred(player)
 	if pos is Vector3:
 		player.set_deferred("global_position", pos)
@@ -53,6 +55,8 @@ static func start_ambience() -> void:
 		p.stream = get_stream(pair[0])
 		p.volume_db = pair[1]
 		p.autoplay = true
+		if AudioServer.get_bus_index("Ambience") != -1:
+			p.bus = "Ambience"
 		holder.add_child(p)
 	tree.root.add_child.call_deferred(holder)
 
@@ -116,6 +120,21 @@ static func _make(n: String) -> AudioStreamWAV:
 				var t := float(i) / RATE
 				y += 0.12 * (rng.randf_range(-1.0, 1.0) - y)
 				out[i] = (sin(TAU * 95.0 * t) * 0.6 + y * 1.4) * exp(-t * 22.0)
+		"ui_move":
+			var len := int(RATE * 0.09)
+			out.resize(len)
+			for i in len:
+				var t := float(i) / RATE
+				out[i] = (sin(TAU * 420.0 * t) * 0.5 + sin(TAU * 630.0 * t) * 0.2) * exp(-t * 55.0) * 0.5
+		"ui_click":
+			var len := int(RATE * 0.34)
+			out.resize(len)
+			var y := 0.0
+			for i in len:
+				var t := float(i) / RATE
+				y += 0.2 * (rng.randf_range(-1.0, 1.0) - y)
+				out[i] = sin(TAU * lerpf(190.0, 110.0, minf(t * 5.0, 1.0)) * t) * exp(-t * 14.0) * 0.8 \
+					+ sin(TAU * 880.0 * t) * exp(-t * 20.0) * 0.18 + y * exp(-t * 60.0) * 0.4
 		"slam":
 			var len := int(RATE * 0.9)
 			out.resize(len)

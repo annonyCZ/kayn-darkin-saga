@@ -4,7 +4,10 @@
 - Characters are primitive-built placeholders with procedural animation (no skeleton/AnimationTree); replace with real rigged models.
 - Navigation is baked at load from static colliders (scripts/world/arena_nav.gd); fine for the test arena, large worlds need a pre-baked/tiled navmesh. Enemies do not yet avoid each other.
 - Gamepad bindings defined but never tested on hardware.
-- Pause menu is minimal (Resume / Quit); no settings screen yet.
+- Pause menu is minimal and still English (Resume / Main menu / Quit); the settings screen is only reachable from the main menu.
+- Menu: key rebinding covers keyboard/mouse only (gamepad stays on defaults); resolution applies in windowed mode only; there is no slot deletion; saves hold only the path choice (no world position/inventory yet).
+- Menu art and gallery images were supplied by the author; their generator/licence is not documented (see ASSET_REGISTER) - confirm before distributing commercially.
+- Menu visuals verified with software GL screenshots only; check fullscreen/borderless and V-Sync on real hardware.
 - Rock/material .tscn files reference old UIDs (harmless warnings; Godot falls back to paths).
 - Not tested in the Godot 4.7 editor (verified on 4.5).
 - Ability/block visuals are minimal (sword raise only); no VFX or sound.

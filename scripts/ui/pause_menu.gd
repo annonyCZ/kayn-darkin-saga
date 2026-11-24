@@ -19,8 +19,16 @@ func _ready() -> void:
 	t.add_theme_font_size_override("font_size", 32)
 	v.add_child(t)
 	var r := Button.new(); r.text = "Resume"; r.pressed.connect(toggle); v.add_child(r)
+	var mm := Button.new(); mm.text = "Main menu"; mm.pressed.connect(_to_main_menu); v.add_child(mm)
 	var q := Button.new(); q.text = "Quit game"; q.pressed.connect(func() -> void: get_tree().quit()); v.add_child(q)
 	add_child(_panel)
+
+## Back to the main menu (progress is already saved by GameState on every change).
+func _to_main_menu() -> void:
+	get_tree().paused = false
+	if DisplayServer.get_name() != "headless":
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func is_open() -> bool:
 	return _panel.visible

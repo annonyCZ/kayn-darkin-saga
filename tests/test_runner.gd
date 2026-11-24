@@ -327,7 +327,7 @@ func _ready() -> void:
 	gs.reset_campaign()
 
 	print("== Audio and VFX")
-	for sn in ["swing", "hit", "parry", "block", "slam", "growl", "death", "dodge", "wind", "drone"]:
+	for sn in ["swing", "hit", "parry", "block", "slam", "growl", "death", "dodge", "wind", "drone", "ui_move", "ui_click"]:
 		var w := Sfx.get_stream(sn)
 		check(w != null and w.data.size() > 1000, "synthesized sound '%s' has audio data" % sn)
 	var before_fx := get_tree().root.get_child_count()
@@ -345,6 +345,8 @@ func _ready() -> void:
 	pm.toggle()
 	check(not pm.is_open() and not get_tree().paused, "pause menu closes and resumes")
 
+	await _menu_tests()
+
 	print("\n%d checks, %d failed" % [_checks, _fails])
 	get_tree().quit(1 if _fails > 0 else 0)
 
@@ -352,3 +354,192 @@ func _key(code: Key) -> InputEventKey:
 	var e := InputEventKey.new()
 	e.physical_keycode = code
 	return e
+
+# ------------------------------------------------------------------ main menu
+func _new_menu() -> MainMenu:
+	var m := (load("res://scenes/ui/main_menu.tscn") as PackedScene).instantiate() as MainMenu
+	m.dry_run = true
+	m.fade_time = 0.05
+	add_child(m)
+	return m
+
+func _menu_tests() -> void:
+	print("== Main menu")
+	var gs := get_node("/root/GameState")
+	var st := get_node("/root/Settings")
+	var old_prefix: String = gs.save_prefix
+	var old_path: String = gs.save_path
+	gs.save_prefix = "user://test_menu_"
+	var wipe := func() -> void:
+		for i in range(1, 4):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(gs.slot_path(i)))
+	wipe.call()
+	gs.reset_campaign()
+	check(ProjectSettings.get_setting("application/run/main_scene") == "res://scenes/ui/main_menu.tscn", "project starts on the main menu scene")
+	check(ResourceLoader.exists(MainMenu.GAME_SCENE), "game scene targeted by the menu exists")
+
+	var m := _new_menu()
+	await frames(5)
+	check(m.items.size() == 7, "menu has 7 entries")
+	var labels: Array = []
+	for id: String in m.items:
+		labels.append((m.items[id] as MenuItem).label_text)
+	check(labels == ["Pokračovat", "Nová hra", "Načíst hru", "Nastavení", "Galerie", "Autoři", "Ukončit hru"], "menu entries are Czech and in order")
+	check((m.items["continue"] as MenuItem).disabled and (m.items["load"] as MenuItem).disabled, "Continue/Load disabled without saves")
+	check(m._art.texture != null and m._art.texture.get_width() > 1000, "key art texture loaded")
+
+	# --- New game
+	var got: Array = []
+	m.game_requested.connect(func(slot: int, new_game: bool) -> void: got.append([slot, new_game]))
+	m.activate("new")
+	check(got == [[1, true]], "New game requests slot 1 as a fresh campaign")
+	check(FileAccess.file_exists(gs.slot_path(1)) and gs.slot == 1 and not gs.path_locked, "New game creates a fresh save in slot 1")
+	m.queue_free()
+	await frames(2)
+
+	# --- Continue / Load with several slots
+	gs.set_slot(2)
+	gs.kayn_path = KaynPaths.Path.RHAAST
+	gs.path_locked = true
+	gs.save_game()
+	gs.reset_campaign()
+	m = _new_menu()
+	await frames(3)
+	check(not (m.items["continue"] as MenuItem).disabled and not (m.items["load"] as MenuItem).disabled, "Continue/Load enabled once saves exist")
+	check(gs.latest_slot() in [1, 2], "latest_slot finds a save")
+	got.clear()
+	m.game_requested.connect(func(slot: int, new_game: bool) -> void: got.append([slot, new_game]))
+	m.activate("load")
+	await frames(3)
+	check(m.panel is LoadPanel, "Load opens the slot list")
+	var lp := m.panel as LoadPanel
+	check(not lp.cards[0].disabled and not lp.cards[1].disabled and lp.cards[2].disabled, "occupied slots enabled, empty slot disabled")
+	check("Rhaast" in LoadPanel.describe(gs.slot_info(2)), "slot card describes the chosen path")
+	lp.cards[1].pressed.emit()
+	check(got == [[2, false]] and gs.slot == 2 and gs.kayn_path == KaynPaths.Path.RHAAST and gs.path_locked, "loading slot 2 restores Rhaast path")
+	m.queue_free()
+	await frames(2)
+
+	# --- New game with all slots full asks before overwriting
+	gs.set_slot(3)
+	gs.reset_campaign()
+	gs.save_game()
+	gs.reset_campaign()
+	m = _new_menu()
+	await frames(3)
+	got.clear()
+	m.game_requested.connect(func(slot: int, new_game: bool) -> void: got.append([slot, new_game]))
+	m.activate("new")
+	check(m.confirm_open and got.is_empty(), "New game with full slots asks for confirmation")
+	(m._confirm_host.find_child("No", true, false) as Button).pressed.emit()
+	await frames(2)
+	check(not m.confirm_open and got.is_empty() and FileAccess.file_exists(gs.slot_path(2)), "cancelling keeps all saves untouched")
+	m.activate("new")
+	(m._confirm_host.find_child("Yes", true, false) as Button).pressed.emit()
+	check(got.size() == 1 and got[0][1] == true and not gs.path_locked, "confirming overwrites the oldest slot with a new campaign")
+	m.queue_free()
+	await frames(2)
+	wipe.call()
+
+	# --- Quit confirmation
+	m = _new_menu()
+	await frames(3)
+	var quits: Array = []
+	m.quit_requested.connect(func() -> void: quits.append(1))
+	m.activate("quit")
+	check(m.confirm_open and quits.is_empty(), "Quit asks for confirmation first")
+	await tap_event("ui_cancel")
+	check(not m.confirm_open and quits.is_empty(), "Esc dismisses the quit dialog")
+	m.activate("quit")
+	(m._confirm_host.find_child("No", true, false) as Button).pressed.emit()
+	check(quits.is_empty(), "'Stay' does not quit")
+	m.activate("quit")
+	(m._confirm_host.find_child("Yes", true, false) as Button).pressed.emit()
+	check(quits.size() == 1, "'Quit' confirms and requests quit")
+	m.queue_free()
+	await frames(2)
+
+	# --- Gallery, credits
+	m = _new_menu()
+	await frames(3)
+	m.activate("gallery")
+	await frames(3)
+	var gp := m.panel as GalleryPanel
+	check(gp != null and GalleryPanel.ITEMS.all(func(it: Dictionary) -> bool: return load(it["path"]) is Texture2D), "gallery opens and all images load")
+	gp.show_index(1, true)
+	check(gp.index == 1, "gallery moves to next image")
+	await tap_event("ui_cancel")
+	check(m.panel == null, "Esc closes the gallery")
+	m.activate("credits")
+	await frames(3)
+	check(m.panel is CreditsPanel and "annonyCZ" in CreditsPanel.TEXT and "Riot" in CreditsPanel.TEXT, "credits show author and fan-project notice")
+	m.close_panel()
+	await frames(2)
+
+	# --- Settings are real
+	m.activate("settings")
+	await frames(3)
+	var sp := m.panel as SettingsPanel
+	check(sp != null, "Settings panel opens")
+	var rows: Array = sp._content.get_children().filter(func(n: Node) -> bool: return n is ChoiceRow)
+	check(rows.size() == 6, "graphics tab has 6 options")
+	var msaa_row := rows[3] as ChoiceRow
+	msaa_row.set_index(0)
+	msaa_row.step(2)
+	check(st.msaa == 2 and get_tree().root.msaa_3d == Viewport.MSAA_4X, "MSAA option changes the viewport")
+	var scale_row := rows[4] as ChoiceRow
+	scale_row.set_index(5)
+	scale_row.step(-2)
+	check(is_equal_approx(st.render_scale, 0.8) and is_equal_approx(get_tree().root.scaling_3d_scale, 0.8), "3D scale option changes the viewport")
+	var fps_row := rows[5] as ChoiceRow
+	fps_row.set_index(0)
+	fps_row.step(2)
+	check(st.fps_cap == 60 and Engine.max_fps == 60, "FPS cap option applies")
+	var vs_row := rows[2] as ChoiceRow
+	vs_row.step(1)
+	check(st.vsync == false, "V-Sync option stored")
+	sp._set_tab(1)
+	await frames(2)
+	var sliders: Array = sp._content.get_children().filter(func(n: Node) -> bool: return n is SliderRow)
+	check(sliders.size() == 3, "audio tab has 3 volume sliders")
+	(sliders[0] as SliderRow).slider.value = 0.5
+	check(is_equal_approx(st.vol_master, 0.5) and is_equal_approx(AudioServer.get_bus_volume_db(0), linear_to_db(0.5)), "master volume slider drives the Master bus")
+	(sliders[1] as SliderRow).slider.value = 0.25
+	var sfx_bus := AudioServer.get_bus_index("SFX")
+	check(sfx_bus != -1 and is_equal_approx(AudioServer.get_bus_volume_db(sfx_bus), linear_to_db(0.25)), "effects slider drives the SFX bus")
+	(sliders[2] as SliderRow).slider.value = 0.0
+	check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Ambience")), "ambience slider at 0 mutes the Ambience bus")
+	var cfg := ConfigFile.new()
+	check(cfg.load("user://settings.cfg") == OK and is_equal_approx(float(cfg.get_value("audio", "master", -1.0)), 0.5)
+		and int(cfg.get_value("graphics", "msaa", -1)) == 2, "settings persisted to disk")
+	sp._set_tab(2)
+	await frames(2)
+	var sens := (sp._content.get_children().filter(func(n: Node) -> bool: return n is SliderRow)[0] as SliderRow)
+	sens.slider.value = 1.75
+	check(is_equal_approx(st.mouse_sensitivity, 1.75), "mouse sensitivity slider applies")
+	# Rebinding keeps the gamepad binding and swaps conflicts.
+	var jump_old: InputEventKey = null
+	for e in InputMap.action_get_events("jump"):
+		if e is InputEventKey:
+			jump_old = e
+	sp.begin_capture("jump")
+	var swapped: String = sp.apply_capture(_key(KEY_J))
+	var has_pad := InputMap.action_get_events("jump").any(func(e: InputEvent) -> bool: return e is InputEventJoypadButton)
+	var has_j := InputMap.action_get_events("jump").any(func(e: InputEvent) -> bool: return e is InputEventKey and e.physical_keycode == KEY_J)
+	check(swapped == "" and has_j and has_pad, "rebinding jump to J keeps the gamepad button")
+	check(st.binding_text("jump") == "J", "binding label shows the new key")
+	var dodge_old: String = st.binding_text("dodge")
+	sp.begin_capture("dodge")
+	swapped = sp.apply_capture(_key(KEY_J))
+	check(swapped == "jump" and st.binding_text("dodge") == "J" and st.binding_text("jump") == dodge_old, "conflicting key is swapped between actions")
+	sp.reset_defaults()
+	check(st.vol_master == 0.8 and st.msaa == 0 and st.fps_cap == 0 and Engine.max_fps == 0 and st.binding_text("jump") == jump_old.as_text_physical_keycode(), "reset restores defaults")
+	m.queue_free()
+	await frames(2)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://settings.cfg"))
+	get_tree().root.msaa_3d = Viewport.MSAA_DISABLED
+	get_tree().root.scaling_3d_scale = 1.0
+	wipe.call()
+	gs.save_prefix = old_prefix
+	gs.save_path = old_path
+	gs.reset_campaign()

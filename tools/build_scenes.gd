@@ -111,6 +111,7 @@ func _init() -> void:
 	_build_camera_rig()
 	_build_hud()
 	_build_pause_menu()
+	_build_main_menu()
 	_build_altar()
 	_build_arena()
 	_build_main()
@@ -330,6 +331,12 @@ func _build_pause_menu() -> void:
 	var pm := PauseMenu.new()
 	pm.name = "PauseMenu"
 	_save(pm, "res://scenes/ui/pause_menu.tscn")
+
+func _build_main_menu() -> void:
+	var mm := MainMenu.new()
+	mm.name = "MainMenu"
+	mm.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_save(mm, "res://scenes/ui/main_menu.tscn")
 
 func _build_hud() -> void:
 	var h := Hud.new()
