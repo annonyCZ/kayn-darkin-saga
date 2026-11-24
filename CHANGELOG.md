@@ -19,6 +19,12 @@
 - Synthesized audio, VFX, weapon trail, lock-on marker.
 - HUD frames + screen FX overlay; AI character pipeline doc; 74 tests.
 
+## 0.6.0 - 2026-11-24
+- Village at the north edge of the arena plateau (`scripts/world/village.gd`): supplied Japanese village pack (tori gate, 4 houses, market stalls with goods, lanterns, fences, red plum trees, crates/barrels, roads) and the Chinese four-corner pavilion (`scripts/world/chinese_pavilion.gd`, scaled from cm, coloured by part role, pillar collision).
+- Props get collision from mesh bounds; houses, stalls and trees carve the navmesh; trees/grass keep the village clear.
+- Navmesh cell size 0.3 (map and mesh match): removes the "More than 2 edges tried to occupy the same map rasterization space" error and the fragmented navmesh it caused.
+- One rock moved out of the village area. 128 headless checks (11 new). Tools: `tests/prop_preview.*`, `tests/village_view.*` (need a display).
+
 ## 0.5.0 - 2026-11-24
 - Main menu (Czech) is now the start scene: Pokračovat, Nová hra, Načíst hru, Nastavení, Galerie, Autoři, Ukončit hru (with confirmation).
   Key art of the author's Kayn (right), animated mist, embers, ash, falling leaves, pulsing Darkin-arm glow, mouse parallax, fade transitions.

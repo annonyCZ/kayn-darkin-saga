@@ -73,6 +73,8 @@ func _trees(rng: RandomNumberGenerator) -> void:
 		var r := rng.randf_range(36.0, 104.0)
 		var x := cos(ang) * r
 		var z := sin(ang) * r
+		if Village.contains_xz(x, z):
+			continue
 		var h := TerrainGen.height_at(x, z)
 		# skip steep ground
 		var slope := absf(TerrainGen.height_at(x + 1.5, z) - h) + absf(TerrainGen.height_at(x, z + 1.5) - h)
@@ -141,8 +143,8 @@ func _grass(rng: RandomNumberGenerator) -> void:
 		var r := sqrt(rng.randf()) * 50.0
 		var x := cos(ang) * r
 		var z := sin(ang) * r
-		if Vector2(x - 7.0, z - 8.0).length() < 3.2:
-			continue    # keep the altar clear
+		if Vector2(x - 7.0, z - 8.0).length() < 3.2 or Village.contains_xz(x, z):
+			continue    # keep the altar and the village clear
 		var h := TerrainGen.height_at(x, z)
 		var slope := absf(TerrainGen.height_at(x + 1.0, z) - h) + absf(TerrainGen.height_at(x, z + 1.0) - h)
 		if slope > 1.2:

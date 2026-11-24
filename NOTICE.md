@@ -12,6 +12,9 @@ for this project. It does not grant any rights to third-party trademarks or lore
 **Third-party content**
 - Rock models / ground textures in `assets/environments/terrain3d_demo/`: from the Terrain3D demo project; textures from
   ambientCG, CC0 1.0 (https://docs.ambientcg.com/license/). Verify upstream terms before commercial use.
+- Village props in `assets/environments/japan_village/` and the pavilion in `assets/environments/chinese_pavilion/` were supplied
+  by the project author without licence files; their terms are **unverified** (see docs/ASSET_REGISTER.md).
+- Fonts Cinzel and Cormorant Garamond in `assets/ui/fonts/` are SIL OFL 1.1 (licence texts alongside).
 - Terrain3D (MIT, https://github.com/TokisanGames/Terrain3D) is an optional addon, **not** committed here.
   Install it into `addons/terrain_3d/` when working on terrain (see README).
 - Godot Engine is MIT licensed (https://godotengine.org/license).

@@ -359,9 +359,12 @@ func _build_arena() -> void:
 		a.add_child(w)
 	var forest := Forest.new(); forest.name = "Forest"
 	a.add_child(forest)
+	# Village (Japanese pack + Chinese pavilion) at the north edge of the plateau
+	var village := Village.new(); village.name = "Village"
+	a.add_child(village)
 	# Real rock assets (CC0 Terrain3D demo models) as landmarks / cover
 	var rocks := ["RockA", "RockB", "RockC"]
-	var spots := [Vector3(-12, 0, -14), Vector3(14, 0, -10), Vector3(-18, 0, 8), Vector3(20, 0, 14), Vector3(0, 0, -26), Vector3(-26, 0, -4), Vector3(27, 0, -3)]
+	var spots := [Vector3(-12, 0, -14), Vector3(14, 0, -10), Vector3(-18, 0, 8), Vector3(20, 0, 14), Vector3(-18, 0, -25), Vector3(-26, 0, -4), Vector3(27, 0, -3)]
 	for i in spots.size():
 		var ps: PackedScene = load("res://assets/environments/terrain3d_demo/models/%s.tscn" % rocks[i % 3])
 		if ps:

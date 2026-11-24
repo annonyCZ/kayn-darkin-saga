@@ -345,6 +345,7 @@ func _ready() -> void:
 	pm.toggle()
 	check(not pm.is_open() and not get_tree().paused, "pause menu closes and resumes")
 
+	await _village_tests()
 	await _menu_tests()
 
 	print("\n%d checks, %d failed" % [_checks, _fails])
@@ -543,3 +544,36 @@ func _menu_tests() -> void:
 	gs.save_prefix = old_prefix
 	gs.save_path = old_path
 	gs.reset_campaign()
+
+# ------------------------------------------------------------------ village
+func _village_tests() -> void:
+	print("== Village (supplied Japanese pack + Chinese pavilion)")
+	var v := main.get_node_or_null("TestArena/Village") as Village
+	check(v != null, "village is part of the arena")
+	if v == null:
+		return
+	check(v.prop_count >= 50, "village placed %d props" % v.prop_count)
+	check(v.collider_count >= 20, "village props have colliders (%d)" % v.collider_count)
+	check(v.pavilion != null and v.pavilion.unmatched_parts.is_empty(), "pavilion parts all got a material")
+	check(v.pavilion.find_children("*", "MeshInstance3D", true, false).size() > 50, "pavilion model loaded")
+	var missing := 0
+	for e: Array in Village.LAYOUT:
+		if not ResourceLoader.exists(Village.MODELS + e[0] + ".gltf"):
+			missing += 1
+	check(missing == 0, "every model in the village layout exists")
+	var space: PhysicsDirectSpaceState3D = main.get_world_3d().direct_space_state
+	# A ray from the side hits the first house (solid), a ray through the gate opening does not.
+	var house_pos: Vector3 = Village.CENTER + Vector3(-11.0, 1.5, -3.0)
+	var q := PhysicsRayQueryParameters3D.create(house_pos + Vector3(-8, 0, 0), house_pos + Vector3(8, 0, 0))
+	q.collision_mask = 1
+	check(not space.intersect_ray(q).is_empty(), "village house blocks a ray (has collision)")
+	var gate_z: float = Village.CENTER.z + 11.5
+	var q2 := PhysicsRayQueryParameters3D.create(Vector3(0, 1.2, gate_z + 4.0), Vector3(0, 1.2, gate_z - 4.0))
+	q2.collision_mask = 1
+	check(space.intersect_ray(q2).is_empty(), "tori gate opening is walkable")
+	var nav_map: RID = main.get_world_3d().navigation_map
+	var p := NavigationServer3D.map_get_path(nav_map, Village.CENTER + Vector3(0, 0, 16), Village.CENTER + Vector3(0, 0, -4), true)
+	check(p.size() >= 2, "navmesh connects the arena to the village centre")
+	var closest := NavigationServer3D.map_get_closest_point(nav_map, house_pos)
+	check(Vector2(closest.x - house_pos.x, closest.z - house_pos.z).length() > 2.0, "navmesh is carved around houses")
+	check(Village.contains_xz(Village.CENTER.x, Village.CENTER.z) and not Village.contains_xz(0.0, 0.0), "forest clearing covers the village only")
