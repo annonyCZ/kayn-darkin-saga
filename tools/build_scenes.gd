@@ -386,9 +386,9 @@ func _build_arena() -> void:
 			a.add_child(body)
 	# Light + environment: low golden sun, filmic grade, bloom, AO, fog
 	var sun := DirectionalLight3D.new(); sun.name = "Sun"
-	sun.rotation_degrees = Vector3(-15, -35, 0)
-	sun.light_color = Color(1.0, 0.76, 0.6)
-	sun.light_energy = 1.25
+	sun.rotation_degrees = Vector3(-26, -35, 0)
+	sun.light_color = Color(1.0, 0.82, 0.68)
+	sun.light_energy = 1.7
 	sun.shadow_enabled = true
 	sun.shadow_bias = 0.04
 	sun.shadow_normal_bias = 1.6
@@ -403,8 +403,8 @@ func _build_arena() -> void:
 	var env := WorldEnvironment.new(); env.name = "WorldEnvironment"
 	var e := Environment.new()
 	var sky := Sky.new(); var psm := ProceduralSkyMaterial.new()
-	psm.sky_top_color = Color(0.05, 0.06, 0.15)
-	psm.sky_horizon_color = Color(0.42, 0.26, 0.32)
+	psm.sky_top_color = Color(0.13, 0.15, 0.21)
+	psm.sky_horizon_color = Color(0.58, 0.45, 0.4)
 	psm.sky_curve = 0.14
 	psm.ground_horizon_color = Color(0.22, 0.16, 0.2)
 	psm.ground_bottom_color = Color(0.05, 0.04, 0.05)
@@ -414,7 +414,7 @@ func _build_arena() -> void:
 	e.sky = sky
 	e.background_mode = Environment.BG_SKY
 	e.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	e.ambient_light_energy = 0.5
+	e.ambient_light_energy = 1.0
 	e.tonemap_mode = Environment.TONE_MAPPER_ACES
 	e.tonemap_exposure = 1.0
 	e.glow_enabled = true
@@ -426,7 +426,7 @@ func _build_arena() -> void:
 	e.ssao_intensity = 2.6
 	e.ssil_enabled = false
 	e.fog_enabled = true
-	e.fog_light_color = Color(0.2, 0.2, 0.29)
+	e.fog_light_color = Color(0.36, 0.35, 0.39)
 	e.fog_light_energy = 1.0
 	e.fog_sun_scatter = 0.5
 	e.fog_density = 0.0048
@@ -437,7 +437,7 @@ func _build_arena() -> void:
 	e.volumetric_fog_length = 90.0
 	e.adjustment_enabled = true
 	e.adjustment_contrast = 1.18
-	e.adjustment_saturation = 0.88
+	e.adjustment_saturation = 0.78
 	env.environment = e
 	a.add_child(env)
 	# Markers

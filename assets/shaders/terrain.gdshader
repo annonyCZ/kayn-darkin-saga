@@ -6,7 +6,7 @@ uniform sampler2D dirt_tex : source_color, repeat_enable, filter_linear_mipmap_a
 uniform vec3 grass_tint : source_color = vec3(0.17, 0.24, 0.10);
 uniform vec3 dry_tint : source_color = vec3(0.30, 0.25, 0.14);
 uniform vec3 rock_tint : source_color = vec3(0.26, 0.26, 0.31);
-uniform vec3 dirt_tint : source_color = vec3(0.42, 0.32, 0.24);
+uniform vec3 dirt_tint : source_color = vec3(0.36, 0.31, 0.27);
 uniform vec2 street_a = vec2(0.0, -40.0);
 uniform vec2 street_b = vec2(0.0, -92.0);
 uniform float plaza_r = 9.0;

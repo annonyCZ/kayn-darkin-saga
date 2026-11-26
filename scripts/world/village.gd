@@ -197,7 +197,9 @@ static func prop(parent: Node3D, model: String, local: Vector3, yaw: float, sc: 
 static var _mute_cache: Dictionary = {}
 
 static func _mute_colours(inst: Node, model: String) -> void:
-	var tint := Color(0.62, 0.5, 0.54) if model == "Tree_RedPlum" else Color(0.78, 0.74, 0.74)
+	# toy-like saturated flats -> weathered: strip most of the saturation, then darken (plum trees look dead/ashen)
+	var tint := Color(0.5, 0.42, 0.38) if model == "Tree_RedPlum" else Color(0.8, 0.76, 0.72)
+	var keep := 0.15 if model == "Tree_RedPlum" else 0.5
 	for m in inst.find_children("*", "MeshInstance3D", true, false):
 		var mi := m as MeshInstance3D
 		for i in mi.mesh.get_surface_count():
@@ -207,10 +209,40 @@ static func _mute_colours(inst: Node, model: String) -> void:
 			var key := "%s|%s|%d" % [model, src.resource_path, i]
 			if not _mute_cache.has(key):
 				var d := src.duplicate() as BaseMaterial3D
-				d.albedo_color = src.albedo_color * tint
+				var base := src.albedo_color
+				var lum := base.r * 0.3 + base.g * 0.59 + base.b * 0.11
+				var grey := Color(lum, lum, lum, base.a)
+				d.albedo_color = grey.lerp(base, keep) * tint
+				if d.albedo_texture != null:
+					d.albedo_texture = _weathered(d.albedo_texture, keep)
 				d.roughness = maxf(src.roughness, 0.8)
 				_mute_cache[key] = d
 			mi.set_surface_override_material(i, _mute_cache[key])
+
+static var _tex_cache: Dictionary = {}
+
+## The pack paints colour in an atlas texture, so albedo_color alone cannot desaturate it:
+## build a washed-out, slightly warm-grey copy of the atlas once.
+static func _weathered(tex: Texture2D, keep: float) -> Texture2D:
+	var key := "%d|%.2f" % [tex.get_instance_id(), keep]
+	if _tex_cache.has(key):
+		return _tex_cache[key]
+	var img := tex.get_image()
+	if img == null:
+		return tex
+	img = img.duplicate()
+	if img.is_compressed():
+		img.decompress()
+	for y in img.get_height():
+		for x in img.get_width():
+			var c := img.get_pixel(x, y)
+			var lum := c.r * 0.3 + c.g * 0.59 + c.b * 0.11
+			var g := Color(lum * 1.02, lum, lum * 0.95, c.a)
+			img.set_pixel(x, y, g.lerp(c, keep))
+	img.generate_mipmaps()
+	var t := ImageTexture.create_from_image(img)
+	_tex_cache[key] = t
+	return t
 
 static func _shape(holder: Node3D, v: Village, shape: Shape3D, size: Vector3, pos: Vector3) -> void:
 	var cs := CollisionShape3D.new()
