@@ -19,7 +19,7 @@ const CLEAR_RADIUS := 34.0
 ## Carve radius around big props (navmesh), by model.
 const CARVE: Dictionary = {"House_4x5": 4.4, "MarketStall_Table_Tiered": 2.2, "MarketStall_Table_SideTiered": 1.8,
 	"MarketStall_Table_wSpace": 1.8, "MarketStall_Table_Flat": 1.2, "Tree_RedPlum": 1.0, "WoodenBox_Stack": 1.6,
-	"LogStorage": 1.4, "Fence_Wood": 2.2}
+	"LogStorage": 1.4, "Fence_Wood": 2.2, "shop_tea": 5.0, "stone_lion": 0.9}
 ## Goods on the market stalls: [stall index in `_stalls`, model, dx, dz, y]
 const GOODS: Array = [
 	[0, "Tomato", -0.5, 0.0, 0.8], [0, "Tomato", -0.2, -0.2, 0.8], [0, "Corn", 0.5, 0.1, 0.8], [0, "Carrot_Orange", 0.9, -0.1, 0.8],
@@ -127,7 +127,13 @@ func _plaza() -> void:
 	hall.set_meta("carve_radius", 7.0)
 
 func _trees_and_clutter() -> void:
-	for t in [[-9.0, -14.0], [8.0, -13.0], [-17.5, 28.0], [-25.0, -12.0], [14.0, 27.0], [-20.0, -26.0], [26.0, 8.0]]:
+	# tea house on the west side of the plaza (door faces the pavilion), guardian lions at the gate
+	prop(self, EnvProps.TOWN + "shop_tea.glb", Vector3(-21.5, 0, PLAZA_Z - 2.0), 90.0, 1.0, "box")
+	for sx in [-1.0, 1.0]:
+		prop(self, EnvProps.TOWN + "stone_lion.glb", Vector3(sx * 6.2, 0, GATE_Z - 3.0), 180.0 if sx > 0 else 180.0, 1.1, "cyl")
+	prop(self, EnvProps.TOWN + "rice_jars.glb", Vector3(-17.5, 0, PLAZA_Z + 3.0), 20.0, 1.0, "cyl")
+	prop(self, EnvProps.TOWN + "lantern_post.glb", Vector3(-6.5, 0, PLAZA_Z + 9.0), 0.0, 1.0, "cyl")
+	for t in [[-9.0, -14.0], [8.0, -13.0], [-17.5, 28.0], [-25.0, -12.0], [14.0, 27.0], [26.0, 8.0]]:
 		prop(self, "Tree_RedPlum", Vector3(t[0], 0, t[1]), _rng.randf_range(0, 360), _rng.randf_range(0.9, 1.3), "trunk")
 
 # ------------------------------------------------------------------ helpers
@@ -149,7 +155,7 @@ func _lantern_light(lantern: Node3D) -> void:
 ## Pass `parent` = the village to place at ground height; holders inside other nodes (the hall)
 ## use the given local y as is.
 static func prop(parent: Node3D, model: String, local: Vector3, yaw: float, sc: float, collider: String) -> Node3D:
-	var ps := load(MODELS + model + ".gltf") as PackedScene
+	var ps := load(model if model.begins_with("res://") else MODELS + model + ".gltf") as PackedScene
 	if ps == null:
 		push_warning("Village: missing model " + model)
 		return null
@@ -159,7 +165,7 @@ static func prop(parent: Node3D, model: String, local: Vector3, yaw: float, sc: 
 	var holder: Node3D = StaticBody3D.new() if collider != "" else Node3D.new()
 	if holder is StaticBody3D:
 		(holder as StaticBody3D).collision_layer = 1
-	holder.name = model
+	holder.name = model.get_file().get_basename()
 	var y := local.y
 	if parent is Village:
 		y += TerrainGen.height_at(CENTER.x + local.x, CENTER.z + local.z)
@@ -188,8 +194,9 @@ static func prop(parent: Node3D, model: String, local: Vector3, yaw: float, sc: 
 		"gate":
 			for sx in [-1.0, 1.0]:
 				_shape(holder, v, BoxShape3D.new(), Vector3(0.6, box.size.y, 0.9), Vector3(c.x + sx * (box.size.x * 0.5 - 0.55), c.y, c.z))
-	if CARVE.has(model):
-		holder.set_meta("carve_radius", float(CARVE[model]) * sc)
+	var cname := model.get_file().get_basename()
+	if CARVE.has(cname):
+		holder.set_meta("carve_radius", float(CARVE[cname]) * sc)
 	return holder
 
 ## The pack uses a saturated flat-colour atlas; multiply it down so it sits in the dark, moody grade
@@ -200,6 +207,9 @@ static func _mute_colours(inst: Node, model: String) -> void:
 	# toy-like saturated flats -> weathered: strip most of the saturation, then darken (plum trees look dead/ashen)
 	var tint := Color(0.5, 0.42, 0.38) if model == "Tree_RedPlum" else Color(0.8, 0.76, 0.72)
 	var keep := 0.15 if model == "Tree_RedPlum" else 0.5
+	if model.begins_with("res://"):   # Chinese-town pack: much brighter flat colours
+		tint = Color(0.5, 0.46, 0.43)
+		keep = 0.4
 	for m in inst.find_children("*", "MeshInstance3D", true, false):
 		var mi := m as MeshInstance3D
 		for i in mi.mesh.get_surface_count():

@@ -1,6 +1,6 @@
 class_name Forest
 extends Node3D
-## Scatters low-poly pines (MultiMesh + trunk colliders) and wind-swayed grass over TerrainGen.
+## Scatters weathered pine/dead-tree/rock models from the supplied packs (MultiMesh + colliders) and wind-swayed grass over TerrainGen.
 
 @export var tree_count: int = 420
 @export var grass_count: int = 16000
@@ -57,48 +57,85 @@ func _cone(st: SurfaceTool, y0: float, h: float, r: float, sides: int, col: Colo
 			st.set_color(col * 0.5)
 			st.add_vertex(p)
 
-func _trees(rng: RandomNumberGenerator) -> void:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = _pine_mesh()
-	var body := StaticBody3D.new()
-	body.name = "TreeColliders"
-	body.collision_layer = 1
-	add_child(body)
-	var xforms: Array[Transform3D] = []
-	var tries := 0
-	while xforms.size() < tree_count and tries < tree_count * 12:
-		tries += 1
+## Spawn sites shared by every scatter: (x, z, ground height) outside the village and off steep ground.
+func _site(rng: RandomNumberGenerator, rmin: float, rmax: float, max_slope: float) -> Array:
+	for _i in 12:
 		var ang := rng.randf() * TAU
-		var r := rng.randf_range(36.0, 104.0)
+		var r := rng.randf_range(rmin, rmax)
 		var x := cos(ang) * r
 		var z := sin(ang) * r
 		if Village.contains_xz(x, z):
 			continue
 		var h := TerrainGen.height_at(x, z)
-		# skip steep ground
 		var slope := absf(TerrainGen.height_at(x + 1.5, z) - h) + absf(TerrainGen.height_at(x, z + 1.5) - h)
-		if slope > 2.6:
+		if slope > max_slope:
 			continue
-		var s := rng.randf_range(0.8, 1.7)
-		var b := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.9, 1.25), s))
-		xforms.append(Transform3D(b, Vector3(x, h - 0.2, z)))
-		if r < 100.0:
+		return [x, z, h, r]
+	return []
+
+## One MultiMesh of `count` instances of a weathered pack model, with optional round trunk/boulder colliders.
+func _scatter(rng: RandomNumberGenerator, nm: String, mesh: Mesh, count: int, rmin: float, rmax: float, smin: float, smax: float,
+		col_radius: float, col_height: float, tilt: float = 0.0, max_slope: float = 2.6) -> int:
+	if mesh == null:
+		return 0
+	var body := StaticBody3D.new()
+	body.name = nm + "Colliders"
+	body.collision_layer = 1
+	add_child(body)
+	var xforms: Array[Transform3D] = []
+	var tries := 0
+	while xforms.size() < count and tries < count * 6:
+		tries += 1
+		var site := _site(rng, rmin, rmax, max_slope)
+		if site.is_empty():
+			continue
+		var s := rng.randf_range(smin, smax)
+		var b := Basis(Vector3.UP, rng.randf() * TAU)
+		if tilt > 0.0:
+			b = b * Basis(Vector3(1, 0, 0), rng.randf_range(-tilt, tilt)) * Basis(Vector3(0, 0, 1), rng.randf_range(-tilt, tilt))
+		b = b.scaled(Vector3(s, s * rng.randf_range(0.9, 1.3), s))
+		xforms.append(Transform3D(b, Vector3(site[0], float(site[2]) - 0.15, site[1])))
+		if col_radius > 0.0 and float(site[3]) < 100.0:
 			var cs := CollisionShape3D.new()
 			var cyl := CylinderShape3D.new()
-			cyl.radius = 0.3 * s
-			cyl.height = 4.0
+			cyl.radius = col_radius * s
+			cyl.height = col_height * s
 			cs.shape = cyl
-			cs.position = Vector3(x, h + 2.0, z)
+			cs.position = Vector3(site[0], float(site[2]) + col_height * s * 0.5, site[1])
 			body.add_child(cs)
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh
 	mm.instance_count = xforms.size()
 	for i in xforms.size():
 		mm.set_instance_transform(i, xforms[i])
 	var mmi := MultiMeshInstance3D.new()
-	mmi.name = "Pines"
+	mmi.name = nm
 	mmi.multimesh = mm
-	mmi.visibility_range_end = 170.0
+	mmi.visibility_range_end = 190.0
 	add_child(mmi)
+	return xforms.size()
+
+func _trees(rng: RandomNumberGenerator) -> void:
+	var pine := EnvProps.mesh(EnvProps.NATURE + "tree_pine_02.glb", 0.3, Color(0.55, 0.58, 0.55))
+	var alpine := EnvProps.mesh(EnvProps.NATURE + "tree_alpine_pine_03.glb", 0.3, Color(0.5, 0.54, 0.54))
+	var dead := EnvProps.mesh(EnvProps.NATURE + "tree_mangrove_01.glb", 0.1, Color(0.38, 0.36, 0.34))
+	var birch := EnvProps.mesh(EnvProps.NATURE + "tree_birch_01.glb", 0.0, Color(0.42, 0.4, 0.38))
+	var rock := EnvProps.mesh(EnvProps.NATURE + "rock_02.glb", 0.15, Color(0.62, 0.62, 0.64))
+	var sand := EnvProps.mesh(EnvProps.NATURE + "rock_sandstone_01.glb", 0.1, Color(0.5, 0.48, 0.47))
+	var basalt := EnvProps.mesh(EnvProps.NATURE + "basalt_columns_02.glb", 0.0, Color(0.9, 0.9, 0.95))
+	var glow := EnvProps.mesh(EnvProps.NATURE + "mushroom_glow_01.glb", 0.9, Color(0.5, 0.55, 0.6))
+	# forest bulk: two pine silhouettes (very different heights), dead twisted trees and bare birches between them
+	_scatter(rng, "Pines", pine, int(tree_count * 0.55), 36.0, 104.0, 1.5, 2.6, 0.22, 4.0)
+	_scatter(rng, "AlpinePines", alpine, int(tree_count * 0.4), 36.0, 104.0, 1.4, 2.8, 0.2, 4.0)
+	_scatter(rng, "DeadTrees", dead, 34, 38.0, 100.0, 1.2, 2.2, 0.35, 3.0, 0.08)
+	_scatter(rng, "Birches", birch, 40, 38.0, 100.0, 1.0, 1.7, 0.12, 3.0, 0.1)
+	# rock formations: boulders, layered sandstone, black basalt columns (monumental accents), mossy small stones
+	_scatter(rng, "Boulders", rock, 60, 30.0, 100.0, 1.6, 4.5, 0.42, 1.6, 0.2, 4.0)
+	_scatter(rng, "Sandstone", sand, 30, 32.0, 100.0, 1.8, 4.0, 0.42, 1.4, 0.2, 4.0)
+	_scatter(rng, "Basalt", basalt, 22, 40.0, 100.0, 1.6, 3.4, 0.9, 2.9, 0.06, 4.0)
+	_scatter(rng, "Stones", rock, 70, 12.0, 60.0, 0.35, 0.8, 0.0, 0.0, 0.3, 1.2)
+	_scatter(rng, "GlowMushrooms", glow, 40, 12.0, 90.0, 1.3, 2.4, 0.0, 0.0, 0.0, 1.5)
 
 # ------------------------------------------------------------------ grass
 func _grass_mesh() -> ArrayMesh:

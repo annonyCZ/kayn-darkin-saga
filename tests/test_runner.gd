@@ -563,6 +563,9 @@ func _village_tests() -> void:
 		if not ResourceLoader.exists(Village.MODELS + g[1] + ".gltf"):
 			missing += 1
 	check(missing == 0, "every market-goods model exists")
+	check(v.get_node_or_null("shop_tea") != null and v.get_node_or_null("stone_lion") != null, "tea house and gate lions from the town pack are placed")
+	var forest := main.get_node_or_null("TestArena/Forest")
+	check(forest != null and forest.get_node_or_null("Pines") != null and forest.get_node_or_null("Basalt") != null, "forest uses pack pines and basalt formations")
 	check(v.house_count >= 6, "village has %d houses" % v.house_count)
 	var space: PhysicsDirectSpaceState3D = main.get_world_3d().direct_space_state
 	# A ray from the side hits the house (solid), a ray through the gate opening does not.

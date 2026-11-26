@@ -46,3 +46,9 @@
 ## 0.7.1 - 2026-11-26
 - Balanced lighting and desaturated village atlas textures (less toy-like).
 - Kayn model rebuilt after the concept art (still procedural primitives, same rig/animations): masked face with red eyes, layered silver hair, high red-lined collar, black coat with straps, belt, chain and pendant, spiked steel pauldron, glowing purple demonic arm with claws, buckled boots, long tattered red cape. Preview tool: `tests/character_view.tscn`.
+
+## 0.8.0 - 2026-11-26
+- Imported Stylized Nature Free Sampler and Low Poly Chinese Town Free Sample (selected GLBs + licences); `EnvProps` weathers them (desaturated/darkened) at load.
+- Forest rebuilt on pack models: two pine silhouettes, dead twisted trees, bare birches, boulders, sandstone, black basalt columns, small stones and glow mushrooms, with colliders (`forest.gd`).
+- Village: tea house at the plaza, guardian lions at the gate, lantern post, rice jars.
+- Grass: lighter roots + cheap translucency so backlit grass is no longer black.
