@@ -3,11 +3,11 @@ extends CanvasLayer
 ## Prototype HUD built in code: health, stamina, lock-on target bar, hints, death overlay.
 
 var _player: Player
-var _hp: ProgressBar
-var _st: ProgressBar
+var _hp: HudBar
+var _st: HudBar
 var _target_box: VBoxContainer
 var _target_name: Label
-var _target_hp: ProgressBar
+var _target_hp: HudBar
 var _death: Label
 var _hint: Label
 var _mouse_hint: Label
@@ -15,8 +15,8 @@ var _path_label: Label
 var _fx: ColorRect
 var _hurt: float = 0.0
 var _last_hp: float = 1.0
-var _ability_bars: Dictionary = {}
-var _ability_labels: Dictionary = {}
+var _slots: Dictionary = {}
+var _hint_age: float = 0.0
 
 func _ready() -> void:
 	layer = 10
@@ -34,16 +34,20 @@ func _ready() -> void:
 	root.add_child(_fx)
 
 	var tl := VBoxContainer.new()
-	tl.position = Vector2(24, 20)
-	tl.custom_minimum_size = Vector2(340, 0)
+	tl.position = Vector2(34, 26)
+	tl.add_theme_constant_override("separation", 6)
 	root.add_child(tl)
-	_hp = _bar(Color(0.78, 0.12, 0.16), 22)
-	_st = _bar(Color(0.25, 0.7, 0.35), 12)
+	_path_label = Label.new()
+	_path_label.add_theme_font_override("font", MenuTheme.title_font())
+	_path_label.add_theme_font_size_override("font_size", 17)
+	_path_label.add_theme_color_override("font_color", Color(0.9, 0.85, 0.78))
+	tl.add_child(_path_label)
+	_hp = HudBar.new(Color(0.74, 0.09, 0.11), 20, 380)
+	_hp.ticks = 10
+	_st = HudBar.new(Color(0.78, 0.66, 0.28), 9, 270)
+	_st.trail_color = Color(0.9, 0.9, 0.8, 0.5)
 	tl.add_child(_hp)
 	tl.add_child(_st)
-	_path_label = Label.new()
-	_path_label.add_theme_font_size_override("font_size", 14)
-	tl.add_child(_path_label)
 
 	_target_box = VBoxContainer.new()
 	_target_box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -53,7 +57,9 @@ func _ready() -> void:
 	root.add_child(_target_box)
 	_target_name = Label.new()
 	_target_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_target_hp = _bar(Color(0.85, 0.5, 0.1), 14)
+	_target_name.add_theme_font_override("font", MenuTheme.title_font())
+	_target_name.add_theme_font_size_override("font_size", 20)
+	_target_hp = HudBar.new(Color(0.8, 0.32, 0.08), 14, 420)
 	_target_box.add_child(_target_name)
 	_target_box.add_child(_target_hp)
 
@@ -76,21 +82,25 @@ func _ready() -> void:
 	root.add_child(_death)
 
 	var ab := HBoxContainer.new()
-	ab.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	ab.position = Vector2(-330, -110)
-	ab.add_theme_constant_override("separation", 12)
+	ab.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	ab.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	ab.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	ab.offset_bottom = -44
+	ab.add_theme_constant_override("separation", 16)
 	root.add_child(ab)
 	for key: String in ["dashslash", "slam"]:
-		var box := VBoxContainer.new()
-		box.custom_minimum_size = Vector2(150, 0)
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override("separation", 4)
+		var slot := AbilitySlot.new("Q" if key == "dashslash" else "E", "dash" if key == "dashslash" else "slam")
+		col.add_child(slot)
 		var lbl := Label.new()
-		lbl.text = "%s [%s]" % [Player.ABILITY_NAMES[key], "Q" if key == "dashslash" else "E"]
-		var bar := _bar(Color(0.3, 0.55, 0.95), 10)
-		box.add_child(lbl)
-		box.add_child(bar)
-		ab.add_child(box)
-		_ability_bars[key] = bar
-		_ability_labels[key] = lbl
+		lbl.text = Player.ABILITY_NAMES[key]
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 14)
+		lbl.modulate = Color(1, 1, 1, 0.75)
+		col.add_child(lbl)
+		ab.add_child(col)
+		_slots[key] = slot
 
 	_mouse_hint = Label.new()
 	_mouse_hint.text = "Paused - click to resume"
@@ -99,25 +109,6 @@ func _ready() -> void:
 	_mouse_hint.add_theme_font_size_override("font_size", 20)
 	_mouse_hint.visible = false
 	root.add_child(_mouse_hint)
-
-func _bar(color: Color, height: int) -> ProgressBar:
-	var b := ProgressBar.new()
-	b.custom_minimum_size = Vector2(0, height)
-	b.show_percentage = false
-	b.min_value = 0.0
-	b.max_value = 1.0
-	b.value = 1.0
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = color
-	fill.set_corner_radius_all(1)
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.03, 0.02, 0.02, 0.75)
-	bg.border_color = Color(0.78, 0.62, 0.3, 0.9)     # thin gold frame
-	bg.set_border_width_all(2)
-	bg.set_corner_radius_all(2)
-	b.add_theme_stylebox_override("fill", fill)
-	b.add_theme_stylebox_override("background", bg)
-	return b
 
 func _process(_delta: float) -> void:
 	if _player == null or not is_instance_valid(_player):
@@ -134,8 +125,10 @@ func _process(_delta: float) -> void:
 	_hp.value = frac
 	_st.value = _player.stamina / _player.max_stamina
 	_path_label.text = String(_player.profile["name"])
-	for key: String in _ability_bars:
-		(_ability_bars[key] as ProgressBar).value = 1.0 - _player.cooldown_fraction(key)
+	for key: String in _slots:
+		(_slots[key] as AbilitySlot).set_cooldown(_player.cooldown_fraction(key))
+	_hint_age += get_process_delta_time()
+	_hint.modulate.a = 0.7 * clampf((24.0 - _hint_age) / 4.0, 0.0, 1.0)
 	_death.visible = _player.state == Player.State.DEAD
 	var t := _player.lock_target
 	if t != null and is_instance_valid(t):

@@ -386,52 +386,58 @@ func _build_arena() -> void:
 			a.add_child(body)
 	# Light + environment: low golden sun, filmic grade, bloom, AO, fog
 	var sun := DirectionalLight3D.new(); sun.name = "Sun"
-	sun.rotation_degrees = Vector3(-24, -40, 0)
-	sun.light_color = Color(1.0, 0.88, 0.72)
-	sun.light_energy = 1.5
+	sun.rotation_degrees = Vector3(-15, -35, 0)
+	sun.light_color = Color(1.0, 0.76, 0.6)
+	sun.light_energy = 1.25
 	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 130.0
+	sun.shadow_bias = 0.04
+	sun.shadow_normal_bias = 1.6
+	sun.directional_shadow_max_distance = 95.0
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-	sun.shadow_blur = 1.2
+	sun.directional_shadow_split_1 = 0.06
+	sun.directional_shadow_split_2 = 0.18
+	sun.directional_shadow_split_3 = 0.45
+	sun.directional_shadow_blend_splits = true
+	sun.shadow_blur = 0.7
 	a.add_child(sun)
 	var env := WorldEnvironment.new(); env.name = "WorldEnvironment"
 	var e := Environment.new()
 	var sky := Sky.new(); var psm := ProceduralSkyMaterial.new()
-	psm.sky_top_color = Color(0.16, 0.26, 0.5)
-	psm.sky_horizon_color = Color(0.95, 0.62, 0.4)
-	psm.sky_curve = 0.18
-	psm.ground_horizon_color = Color(0.6, 0.42, 0.32)
-	psm.ground_bottom_color = Color(0.12, 0.1, 0.1)
+	psm.sky_top_color = Color(0.05, 0.06, 0.15)
+	psm.sky_horizon_color = Color(0.42, 0.26, 0.32)
+	psm.sky_curve = 0.14
+	psm.ground_horizon_color = Color(0.22, 0.16, 0.2)
+	psm.ground_bottom_color = Color(0.05, 0.04, 0.05)
 	psm.sun_angle_max = 25.0
 	psm.sun_curve = 0.1
 	sky.sky_material = psm
 	e.sky = sky
 	e.background_mode = Environment.BG_SKY
 	e.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	e.ambient_light_energy = 0.8
+	e.ambient_light_energy = 0.5
 	e.tonemap_mode = Environment.TONE_MAPPER_ACES
-	e.tonemap_exposure = 0.9
+	e.tonemap_exposure = 1.0
 	e.glow_enabled = true
 	e.glow_intensity = 0.9
 	e.glow_bloom = 0.08
 	e.glow_hdr_threshold = 1.0
 	e.ssao_enabled = true
 	e.ssao_radius = 1.6
-	e.ssao_intensity = 2.0
+	e.ssao_intensity = 2.6
 	e.ssil_enabled = false
 	e.fog_enabled = true
-	e.fog_light_color = Color(0.82, 0.62, 0.5)
+	e.fog_light_color = Color(0.2, 0.2, 0.29)
 	e.fog_light_energy = 1.0
-	e.fog_sun_scatter = 0.35
-	e.fog_density = 0.0025
+	e.fog_sun_scatter = 0.5
+	e.fog_density = 0.0048
 	e.fog_aerial_perspective = 0.5
 	e.volumetric_fog_enabled = true
-	e.volumetric_fog_density = 0.006
-	e.volumetric_fog_albedo = Color(0.9, 0.75, 0.65)
+	e.volumetric_fog_density = 0.012
+	e.volumetric_fog_albedo = Color(0.5, 0.5, 0.62)
 	e.volumetric_fog_length = 90.0
 	e.adjustment_enabled = true
-	e.adjustment_contrast = 1.12
-	e.adjustment_saturation = 1.12
+	e.adjustment_contrast = 1.18
+	e.adjustment_saturation = 0.88
 	env.environment = e
 	a.add_child(env)
 	# Markers

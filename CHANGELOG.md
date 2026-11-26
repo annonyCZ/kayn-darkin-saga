@@ -34,3 +34,11 @@
 - Gallery of the supplied concept art, credits screen, UI sounds (ui_move, ui_click).
 - Pause menu got a "Main menu" button. Fonts Cinzel and Cormorant Garamond (OFL) added.
 - 117 headless checks (43 new for the menu); tests/menu_screenshot.* and tests/menu_flow_check.* for visual and end-to-end checks (need a display).
+
+## 0.7.0 - 2026-11-26
+- Darker, grimmer look: dusk sun/sky/ambient, blue-grey fog, stronger contrast, darker rock/pine/grass tints, 8192 shadow atlas with soft shadows.
+- Valley basin north of the arena (`TerrainGen`): flat floor around the village, hills rising around it; terrain shader blends dirt along the street and plaza.
+- Village rebuilt larger (`village.gd`): tori gate, long street, house rows with fenced yards, market, plaza with pavilion, lantern lights.
+- Enterable hall (`village_hall.gd`): walls with collision, door, roof, beams, furniture, banners, brazier fire, hanging lanterns, interior light.
+- HUD restyle: gold-framed segmented health/stamina bars with damage trail (`hud_bar.gd`), bottom-centre ability hotbar with drawn icons, cooldown wipe and ready flash (`ability_slot.gd`); control hint fades after 24 s.
+- Tests updated for the new layout; added hall, valley and goods checks (135 checks).

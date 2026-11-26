@@ -2,9 +2,15 @@ shader_type spatial;
 // Slope-blended terrain: grass on flats, cliff rock on slopes, world-space UVs, anti-tiling.
 uniform sampler2D grass_tex : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D rock_tex : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
-uniform vec3 grass_tint : source_color = vec3(0.28, 0.42, 0.16);
-uniform vec3 dry_tint : source_color = vec3(0.45, 0.42, 0.22);
-uniform vec3 rock_tint : source_color = vec3(0.5, 0.47, 0.45);
+uniform sampler2D dirt_tex : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
+uniform vec3 grass_tint : source_color = vec3(0.17, 0.24, 0.10);
+uniform vec3 dry_tint : source_color = vec3(0.30, 0.25, 0.14);
+uniform vec3 rock_tint : source_color = vec3(0.26, 0.26, 0.31);
+uniform vec3 dirt_tint : source_color = vec3(0.42, 0.32, 0.24);
+uniform vec2 street_a = vec2(0.0, -40.0);
+uniform vec2 street_b = vec2(0.0, -92.0);
+uniform float plaza_r = 9.0;
+uniform float street_w = 3.4;
 uniform float grass_scale = 0.16;
 uniform float rock_scale = 0.09;
 
@@ -33,7 +39,19 @@ void fragment() {
 	vec3 rock = triplanar(rock_tex, wpos, n, rock_scale) * rock_tint * 1.5;
 	float slope = 1.0 - n.y;
 	float t = smoothstep(0.16, 0.34, slope + (patch - 0.5) * 0.12);
-	ALBEDO = mix(grass, rock, t);
+	vec3 col = mix(grass, rock, t);
+	// packed-earth street + plaza (noisy edges so it does not look like a stencil)
+	vec2 p2 = wpos.xz;
+	vec2 ab = street_b - street_a;
+	float u = clamp(dot(p2 - street_a, ab) / dot(ab, ab), 0.0, 1.0);
+	float d_street = distance(p2, street_a + ab * u);
+	float d_plaza = distance(p2, street_b) - plaza_r;
+	float d = min(d_street - street_w, d_plaza);
+	float edge_n = (texture(grass_tex, p2 * 0.09).r - 0.5) * 3.0;
+	float dirt_m = 1.0 - smoothstep(-0.6, 1.6, d + edge_n);
+	vec3 dirt = mix(texture(dirt_tex, p2 * 0.2).rgb, texture(dirt_tex, p2 * 0.047).rgb, 0.5) * dirt_tint * 2.0;
+	col = mix(col, dirt, dirt_m * (1.0 - t));
+	ALBEDO = col;
 	ROUGHNESS = mix(0.95, 0.85, t);
 	SPECULAR = 0.2;
 }

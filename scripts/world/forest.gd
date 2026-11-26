@@ -17,8 +17,8 @@ func _pine_mesh() -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_cyl(st, 0.0, 3.0, 0.28, 0.18, 7, Color(0.28, 0.18, 0.1))
-	var layers := [[2.0, 3.4, 2.1, Color(0.09, 0.24, 0.11)], [3.6, 3.0, 1.7, Color(0.1, 0.28, 0.12)],
-		[5.0, 2.6, 1.25, Color(0.12, 0.31, 0.13)], [6.3, 2.2, 0.8, Color(0.14, 0.34, 0.14)]]
+	var layers := [[2.0, 3.4, 2.1, Color(0.04, 0.11, 0.07)], [3.6, 3.0, 1.7, Color(0.05, 0.13, 0.08)],
+		[5.0, 2.6, 1.25, Color(0.06, 0.15, 0.09)], [6.3, 2.2, 0.8, Color(0.08, 0.17, 0.1)]]
 	for l: Array in layers:
 		_cone(st, l[0], l[1], l[2], 9, l[3])
 	st.generate_normals()

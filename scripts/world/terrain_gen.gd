@@ -7,6 +7,10 @@ const SIZE := 220.0
 const STEP := 2.0
 const FLAT_R := 52.0
 const BLEND_R := 88.0
+## Village valley: a flat basin north of the arena plateau, walled in by steep hills.
+const BASIN_C := Vector2(0.0, -68.0)
+const BASIN_FLAT := 34.0
+const BASIN_BLEND := 54.0
 
 static var _noise: FastNoiseLite
 
@@ -27,7 +31,8 @@ static func height_at(x: float, z: float) -> float:
 		return 0.0
 	var n := (_n().get_noise_2d(x, z) + 1.0) * 0.5
 	var rim := smoothstep(BLEND_R, SIZE * 0.5, r)
-	return t * (4.0 + n * 20.0) + rim * rim * 24.0
+	var basin := smoothstep(BASIN_FLAT, BASIN_BLEND, Vector2(x, z).distance_to(BASIN_C))
+	return (t * (4.0 + n * 20.0) + rim * rim * 24.0) * basin
 
 func _ready() -> void:
 	collision_layer = 1
@@ -72,6 +77,11 @@ func _ready() -> void:
 	mat.shader = load("res://assets/shaders/terrain.gdshader")
 	mat.set_shader_parameter("grass_tex", load("res://assets/environments/terrain3d_demo/textures/ground037_alb_ht.png"))
 	mat.set_shader_parameter("rock_tex", load("res://assets/environments/terrain3d_demo/textures/rock023_alb_ht.png"))
+	mat.set_shader_parameter("dirt_tex", load("res://assets/environments/terrain3d_demo/textures/ground037_alb_ht.png"))
+	# Village street (dirt) runs along the village's local Z axis from the gate to the plaza.
+	mat.set_shader_parameter("street_a", Vector2(Village.CENTER.x, Village.CENTER.z + Village.GATE_Z))
+	mat.set_shader_parameter("street_b", Vector2(Village.CENTER.x, Village.CENTER.z + Village.PLAZA_Z))
+	mat.set_shader_parameter("plaza_r", Village.PLAZA_RADIUS)
 	mesh.surface_set_material(0, mat)
 	var mi := MeshInstance3D.new()
 	mi.name = "TerrainMesh"

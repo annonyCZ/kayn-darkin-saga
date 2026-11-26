@@ -469,10 +469,12 @@ func _menu_tests() -> void:
 	check(gp != null and GalleryPanel.ITEMS.all(func(it: Dictionary) -> bool: return load(it["path"]) is Texture2D), "gallery opens and all images load")
 	gp.show_index(1, true)
 	check(gp.index == 1, "gallery moves to next image")
+	await frames(6)
 	await tap_event("ui_cancel")
+	await frames(2)
 	check(m.panel == null, "Esc closes the gallery")
 	m.activate("credits")
-	await frames(3)
+	await frames(6)
 	check(m.panel is CreditsPanel and "annonyCZ" in CreditsPanel.TEXT and "Riot" in CreditsPanel.TEXT, "credits show author and fan-project notice")
 	m.close_panel()
 	await frames(2)
@@ -557,23 +559,42 @@ func _village_tests() -> void:
 	check(v.pavilion != null and v.pavilion.unmatched_parts.is_empty(), "pavilion parts all got a material")
 	check(v.pavilion.find_children("*", "MeshInstance3D", true, false).size() > 50, "pavilion model loaded")
 	var missing := 0
-	for e: Array in Village.LAYOUT:
-		if not ResourceLoader.exists(Village.MODELS + e[0] + ".gltf"):
+	for g: Array in Village.GOODS:
+		if not ResourceLoader.exists(Village.MODELS + g[1] + ".gltf"):
 			missing += 1
-	check(missing == 0, "every model in the village layout exists")
+	check(missing == 0, "every market-goods model exists")
+	check(v.house_count >= 6, "village has %d houses" % v.house_count)
 	var space: PhysicsDirectSpaceState3D = main.get_world_3d().direct_space_state
-	# A ray from the side hits the first house (solid), a ray through the gate opening does not.
-	var house_pos: Vector3 = Village.CENTER + Vector3(-11.0, 1.5, -3.0)
-	var q := PhysicsRayQueryParameters3D.create(house_pos + Vector3(-8, 0, 0), house_pos + Vector3(8, 0, 0))
+	# A ray from the side hits the house (solid), a ray through the gate opening does not.
+	var house_pos: Vector3 = Village.CENTER + Vector3(-13.0, 1.5, 8.0)
+	var q := PhysicsRayQueryParameters3D.create(house_pos + Vector3(-6, 0, 0), house_pos + Vector3(6, 0, 0))
 	q.collision_mask = 1
 	check(not space.intersect_ray(q).is_empty(), "village house blocks a ray (has collision)")
-	var gate_z: float = Village.CENTER.z + 11.5
+	var gate_z: float = Village.CENTER.z + Village.GATE_Z
 	var q2 := PhysicsRayQueryParameters3D.create(Vector3(0, 1.2, gate_z + 4.0), Vector3(0, 1.2, gate_z - 4.0))
 	q2.collision_mask = 1
 	check(space.intersect_ray(q2).is_empty(), "tori gate opening is walkable")
 	var nav_map: RID = main.get_world_3d().navigation_map
-	var p := NavigationServer3D.map_get_path(nav_map, Village.CENTER + Vector3(0, 0, 16), Village.CENTER + Vector3(0, 0, -4), true)
-	check(p.size() >= 2, "navmesh connects the arena to the village centre")
+	var p := NavigationServer3D.map_get_path(nav_map, Village.CENTER + Vector3(0, 0, Village.GATE_Z + 8.0), Village.CENTER + Vector3(0, 0, 0), true)
+	check(p.size() >= 2, "navmesh connects the arena to the village street")
 	var closest := NavigationServer3D.map_get_closest_point(nav_map, house_pos)
 	check(Vector2(closest.x - house_pos.x, closest.z - house_pos.z).length() > 2.0, "navmesh is carved around houses")
+	# valley: basin is flat, rim is higher
+	var hb := TerrainGen.height_at(0.0, -68.0)
+	check(absf(hb) < 0.5, "valley floor is flat (%.2f)" % hb)
+	check(TerrainGen.height_at(0.0, -68.0 + 110.0) > hb + 2.0 or TerrainGen.height_at(100.0, -68.0) > hb + 2.0, "valley is ringed by higher ground")
+	# enterable hall
+	var h := v.hall
+	check(h != null and h.wall_colliders >= 4, "hall has wall colliders")
+	check(h != null and h.interior_light != null, "hall has an interior light")
+	if h != null:
+		var door_in: Vector3 = h.global_transform * Vector3(0.0, 1.2, VillageHall.D * 0.5 + 2.0)
+		var inside: Vector3 = h.global_transform * Vector3(0.0, 1.2, 0.0)
+		var q3 := PhysicsRayQueryParameters3D.create(door_in, inside)
+		q3.collision_mask = 1
+		var r3 := space.intersect_ray(q3)
+		check(r3.is_empty(), "hall door opening is walkable")
+		var q4 := PhysicsRayQueryParameters3D.create(h.global_transform * Vector3(-VillageHall.W * 0.5 - 2.0, 1.2, 0.0), inside)
+		q4.collision_mask = 1
+		check(not space.intersect_ray(q4).is_empty(), "hall side wall is solid")
 	check(Village.contains_xz(Village.CENTER.x, Village.CENTER.z) and not Village.contains_xz(0.0, 0.0), "forest clearing covers the village only")

@@ -8,7 +8,7 @@ func _ready() -> void:
 	add_child(cam)
 	cam.current = true
 	cam.fov = 60
-	var views := [[Vector3(0, 30, -36), Vector3(0, 0, -36.01), "top"], [Vector3(2, 4.5, -14), Vector3(0, 2.0, -34), "gate"], [Vector3(-20, 5, -26), Vector3(-2, 2.5, -40), "side"], [Vector3(1, 2.2, -33), Vector3(0, 3.0, -45), "pavilion"]]
+	var views := [[Vector3(0, 70, -66), Vector3(0, 0, -66.01), "top"], [Vector3(3, 3.2, -34), Vector3(0, 2.4, -60), "gate"], [Vector3(-8, 3.0, -60), Vector3(8, 2.0, -85), "side"], [Vector3(21.2, 1.8, -89.2), Vector3(26.5, 1.5, -93.2), "hall"], [Vector3(2, 3.0, -85), Vector3(22, 2.2, -92), "hallout"]]
 	for v in views:
 		cam.position = v[0]
 		cam.look_at(v[1])

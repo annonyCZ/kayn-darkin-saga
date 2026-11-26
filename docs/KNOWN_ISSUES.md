@@ -11,4 +11,5 @@
 - Rock/material .tscn files reference old UIDs (harmless warnings; Godot falls back to paths).
 - Not tested in the Godot 4.7 editor (verified on 4.5).
 - Ability/block visuals are minimal (sword raise only); no VFX or sound.
-- Village: licences of the Japanese pack and the Chinese pavilion are unknown (no licence files shipped) - confirm before distributing/releasing. Pavilion has flat materials only (the supplied UV files are wireframes). Layout is hand-placed; road pieces are only roughly aligned; no interiors, NPCs or interaction yet. Enemies and the player are checked against collision only by ray/navmesh tests, not walked through every prop.
+- Village: licences of the Japanese pack and the Chinese pavilion are unknown (no licence files shipped) - confirm before distributing/releasing. Pavilion has flat materials only (the supplied UV files are wireframes). Layout is hand-placed; road pieces are only roughly aligned; the only interior is the procedural hall (no NPCs, doors do not animate, no interaction yet); the hall's firelight is strongly red and untuned. Enemies and the player are checked against collision only by ray/navmesh tests, not walked through every prop.
+- HUD and pause menu text are still English except the main menu. Dusk lighting was judged only in the compat renderer (very dark in places); retune on a real Forward+ GPU.
