@@ -117,14 +117,52 @@ func _init() -> void:
 	_build_main()
 	quit()
 
-func _node3D_head(skin: Material, hair: Material, red: Material) -> Node3D:
+func _cyl(top: float, bottom: float, h: float, seg: int = 10) -> CylinderMesh:
+	var c := CylinderMesh.new()
+	c.top_radius = top
+	c.bottom_radius = bottom
+	c.height = h
+	c.radial_segments = seg
+	c.rings = 1
+	return c
+
+func _part(parent: Node3D, mesh: Mesh, mat: Material, pos: Vector3, rot_deg: Vector3 = Vector3.ZERO, scl: Vector3 = Vector3.ONE, nm := "Part") -> MeshInstance3D:
+	var mi := _mesh(mesh, mat, pos, nm)
+	mi.rotation_degrees = rot_deg
+	mi.scale = scl
+	parent.add_child(mi)
+	return mi
+
+## Row of hanging strips with a ragged hem (torn cloth). Origin at the top edge, hangs along -Y.
+func _tattered(parent: Node3D, width: float, len_min: float, len_max: float, n: int, mat: Material, seed_v: int, pos: Vector3, nm: String) -> Node3D:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_v
+	var root := _node3d(nm, pos)
+	for i in n:
+		var w := width / n
+		var l := rng.randf_range(len_min, len_max)
+		var strip := _mesh(_box(Vector3(w * 1.04, l, 0.025)), mat, Vector3(-width * 0.5 + w * (i + 0.5), -l * 0.5, rng.randf_range(-0.012, 0.012)), "Strip%d" % i)
+		strip.rotation_degrees = Vector3(0, 0, rng.randf_range(-3.0, 3.0))
+		root.add_child(strip)
+	parent.add_child(root)
+	return root
+
+func _node3D_head(skin: Material, hair: Material, red: Material, maskm: Material) -> Node3D:
 	var head := _node3d("Head", Vector3(0, 1.82, 0))
 	head.add_child(_mesh(_sphere(0.15), skin, Vector3.ZERO, "Skull"))
-	head.add_child(_mesh(_box(Vector3(0.26, 0.06, 0.08)), red, Vector3(0, 0.02, -0.12), "Visor"))
-	for i in 5:
-		var spike := _mesh(_cone_mesh(0.05, 0.28), hair, Vector3((i - 2) * 0.06, 0.2, 0.02 + abs(i - 2) * 0.02), "Hair%d" % i)
-		spike.rotation_degrees = Vector3(-15, 0, (i - 2) * -14)
-		head.add_child(spike)
+	# black face mask over nose and mouth, red eyes above it, hard brow
+	_part(head, _sphere(0.158), maskm, Vector3(0, -0.085, -0.012), Vector3.ZERO, Vector3(1.0, 0.52, 0.98), "Mask")
+	for sx in [-1.0, 1.0]:
+		_part(head, _box(Vector3(0.062, 0.016, 0.02)), red, Vector3(sx * 0.055, 0.025, -0.14), Vector3(0, 0, sx * -10.0), Vector3.ONE, "Eye")
+		_part(head, _box(Vector3(0.075, 0.016, 0.03)), hair, Vector3(sx * 0.055, 0.06, -0.14), Vector3(0, 0, sx * 14.0), Vector3.ONE, "Brow")
+	# swept, layered silver hair: fringe + crown + back spikes
+	var spikes := [
+		[-0.09, 0.12, -0.05, -50, 0, 38], [-0.03, 0.14, -0.09, -60, 0, 12], [0.04, 0.14, -0.09, -58, 0, -12], [0.1, 0.11, -0.05, -48, 0, -40],
+		[-0.12, 0.08, 0.02, -15, 0, 60], [0.12, 0.08, 0.02, -15, 0, -60], [-0.06, 0.15, 0.03, 10, 0, 22], [0.05, 0.16, 0.03, 12, 0, -20],
+		[0.0, 0.14, 0.08, 40, 0, 0], [-0.09, 0.1, 0.08, 38, 0, 28], [0.09, 0.1, 0.08, 38, 0, -28], [0.0, 0.17, -0.02, -8, 0, 0],
+	]
+	for sp: Array in spikes:
+		_part(head, _cone_mesh(0.04, 0.22), hair, Vector3(sp[0], sp[1], sp[2]), Vector3(sp[3] - 18.0, sp[4], sp[5]), Vector3(1.25, 1.0, 0.5), "Hair")
 	return head
 
 func _build_player() -> void:
@@ -157,32 +195,92 @@ func _build_player() -> void:
 	red.emission_enabled = true
 	red.emission = Color(1.0, 0.1, 0.2)
 	red.emission_energy_multiplier = 1.5
-	model.add_child(_mesh(_capsule(0.26, 0.85), cloth, Vector3(0, 1.28, 0), "Body"))
-	model.add_child(_mesh(_box(Vector3(0.5, 0.35, 0.12)), metal, Vector3(0, 1.38, -0.2), "ChestPlate"))
-	model.add_child(_mesh(_box(Vector3(0.62, 0.1, 0.34)), metal, Vector3(0, 1.62, 0), "Pauldrons"))
-	model.add_child(_mesh(_box(Vector3(0.4, 0.12, 0.3)), dark, Vector3(0, 0.95, 0), "Belt"))
-	var head := _node3D_head(skin, hair, red)
+	var coat := _mat(Color(0.11, 0.095, 0.105), 0.5)
+	var trim := _mat(Color(0.32, 0.035, 0.07), 0.6)
+	var steel := _mat(Color(0.38, 0.38, 0.43), 0.38, 0.85)
+	var leather := _mat(Color(0.14, 0.1, 0.08), 0.5)
+	var maskm := _mat(Color(0.03, 0.03, 0.04), 0.9)
+	var capem := _mat(Color(0.36, 0.04, 0.08), 0.85)
+	capem.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var capeb := _mat(Color(0.16, 0.02, 0.05), 0.9)
+	capeb.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var purple := _mat(Color(0.16, 0.05, 0.3), 0.5)
+	purple.emission_enabled = true
+	purple.emission = Color(0.45, 0.12, 0.85)
+	purple.emission_energy_multiplier = 0.55
+	# torso: tapered chest in a black coat with red trim, straps and a studded belt
+	var torso := _part(model, _cyl(0.27, 0.2, 0.74), coat, Vector3(0, 1.3, 0), Vector3.ZERO, Vector3(1.0, 1.0, 0.72), "Body")
+	_part(torso, _box(Vector3(0.1, 0.62, 0.03)), trim, Vector3(-0.1, 0.0, -0.19), Vector3(0, 0, 5), Vector3.ONE, "LapelL")
+	_part(torso, _box(Vector3(0.1, 0.62, 0.03)), trim, Vector3(0.1, 0.0, -0.19), Vector3(0, 0, -5), Vector3.ONE, "LapelR")
+	_part(torso, _box(Vector3(0.09, 0.72, 0.035)), leather, Vector3(0, 0.02, -0.2), Vector3(0, 0, 38), Vector3.ONE, "StrapX1")
+	_part(torso, _box(Vector3(0.09, 0.72, 0.035)), leather, Vector3(0, 0.02, -0.2), Vector3(0, 0, -38), Vector3.ONE, "StrapX2")
+	_part(torso, _box(Vector3(0.07, 0.07, 0.04)), steel, Vector3(0, 0.05, -0.215), Vector3.ZERO, Vector3.ONE, "StrapBuckle")
+	_part(model, _cyl(0.235, 0.235, 0.13, 12), leather, Vector3(0, 0.95, 0), Vector3.ZERO, Vector3(1.0, 1.0, 0.75), "Belt")
+	_part(model, _box(Vector3(0.12, 0.1, 0.04)), steel, Vector3(0, 0.95, -0.185), Vector3.ZERO, Vector3.ONE, "BeltBuckle")
+	for i in 4:
+		_part(model, _box(Vector3(0.018, 0.05, 0.012)), steel, Vector3(0.17, 0.9 - i * 0.045, -0.15 - i * 0.012), Vector3(0, 0, 8), Vector3.ONE, "Chain")
+	_part(model, _cone_mesh(0.04, 0.14), steel, Vector3(0.17, 0.68, -0.21), Vector3(180, 0, 0), Vector3.ONE, "Pendant")
+	# high red-lined collar
+	for sx in [-1.0, 1.0]:
+		_part(model, _box(Vector3(0.03, 0.26, 0.2)), trim, Vector3(sx * 0.17, 1.72, 0.02), Vector3(0, 0, sx * -14.0), Vector3.ONE, "Collar")
+		_part(model, _box(Vector3(0.026, 0.26, 0.2)), coat, Vector3(sx * 0.185, 1.72, 0.02), Vector3(0, 0, sx * -14.0), Vector3.ONE, "CollarOuter")
+	_part(model, _cyl(0.12, 0.14, 0.12, 10), maskm, Vector3(0, 1.7, 0), Vector3.ZERO, Vector3.ONE, "Neck")
+	# coat skirts, split front, ragged hem
+	for sx in [-1.0, 1.0]:
+		var sk := _tattered(model, 0.22, 0.45, 0.78, 5, coat, 11 + int(sx), Vector3(sx * 0.17, 0.95, -0.2), "SkirtFront")
+		sk.rotation_degrees = Vector3(-6, 0, sx * -4.0)
+		var edge := _tattered(model, 0.05, 0.4, 0.7, 1, trim, 5, Vector3(sx * 0.07, 0.95, -0.215), "SkirtTrim")
+		edge.rotation_degrees = Vector3(-6, 0, 0)
+	# right pauldron: layered steel plates with spikes (weapon side)
+	_part(model, _sphere(0.15), steel, Vector3(0.36, 1.64, 0), Vector3.ZERO, Vector3(1.15, 0.6, 1.0), "PauldronR")
+	for i in 4:
+		_part(model, _cone_mesh(0.045, 0.2), steel, Vector3(0.42 + i * 0.015, 1.68 - i * 0.04, 0.0 + (i - 1.5) * 0.06), Vector3(0, 0, -70 + i * 6), Vector3.ONE, "Spike")
+	_part(model, _sphere(0.11), steel, Vector3(-0.36, 1.63, 0), Vector3.ZERO, Vector3(1.1, 0.55, 1.0), "PauldronL")
+	var head := _node3D_head(skin, hair, red, maskm)
 	model.add_child(head)
+	# legs: black trousers, laced boots with buckles, thigh straps
 	for side in [-1, 1]:
 		var leg := _node3d("LegL" if side < 0 else "LegR", Vector3(0.14 * side, 0.92, 0))
-		leg.add_child(_mesh(_capsule(0.11, 0.9), dark, Vector3(0, -0.44, 0), "Mesh"))
-		leg.add_child(_mesh(_box(Vector3(0.2, 0.1, 0.32)), metal, Vector3(0, -0.88, -0.05), "Boot"))
+		_part(leg, _cyl(0.125, 0.095, 0.5), coat, Vector3(0, -0.25, 0), Vector3.ZERO, Vector3.ONE, "Thigh")
+		_part(leg, _cyl(0.1, 0.11, 0.5), coat, Vector3(0, -0.52, 0), Vector3.ZERO, Vector3.ONE, "Boot")
+		_part(leg, _cyl(0.125, 0.105, 0.14), leather, Vector3(0, -0.34, 0), Vector3.ZERO, Vector3.ONE, "BootCuff")
+		for k in 3:
+			_part(leg, _cyl(0.113, 0.113, 0.03), leather, Vector3(0, -0.5 - k * 0.1, 0), Vector3.ZERO, Vector3.ONE, "BootStrap")
+		_part(leg, _box(Vector3(0.2, 0.1, 0.34)), coat, Vector3(0, -0.86, -0.06), Vector3.ZERO, Vector3.ONE, "Foot")
+		_part(leg, _box(Vector3(0.2, 0.025, 0.1)), steel, Vector3(0, -0.8, -0.2), Vector3.ZERO, Vector3.ONE, "Toecap")
+		_part(leg, _cyl(0.1, 0.1, 0.03), leather, Vector3(0, -0.12, 0), Vector3.ZERO, Vector3.ONE, "ThighStrap")
 		model.add_child(leg)
+	# free arm: the purple, demonic one, glowing and wrapped in dark bands
 	var arm_l := _node3d("ArmL", Vector3(-0.38, 1.55, 0))
-	arm_l.add_child(_mesh(_capsule(0.085, 0.62), cloth, Vector3(0, -0.3, 0), "Mesh"))
+	_part(arm_l, _cyl(0.085, 0.07, 0.6), purple, Vector3(0, -0.3, 0), Vector3.ZERO, Vector3.ONE, "Mesh")
+	for k in 3:
+		_part(arm_l, _cyl(0.092, 0.092, 0.04), leather, Vector3(0, -0.14 - k * 0.15, 0), Vector3.ZERO, Vector3.ONE, "Wrap")
+	_part(arm_l, _sphere(0.075), maskm, Vector3(0, -0.64, 0), Vector3.ZERO, Vector3(1, 1.15, 0.8), "Glove")
+	for k in 3:
+		_part(arm_l, _cone_mesh(0.012, 0.1), purple, Vector3((k - 1) * 0.03, -0.74, -0.01), Vector3(180, 0, 0), Vector3.ONE, "Claw")
+	var arm_light := OmniLight3D.new()
+	arm_light.name = "ArmGlow"
+	arm_light.light_color = Color(0.6, 0.2, 1.0)
+	arm_light.light_energy = 0.9
+	arm_light.omni_range = 3.5
+	arm_light.position = Vector3(0, -0.4, -0.1)
+	arm_l.add_child(arm_light)
 	model.add_child(arm_l)
-	var cape := _node3d("Cape", Vector3(0, 1.62, 0.18))
-	var cmat := _mat(Color(0.1, 0.06, 0.18), 0.9)
-	cmat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	cape.add_child(_mesh(_box(Vector3(0.62, 1.15, 0.03)), cmat, Vector3(0, -0.58, 0.02), "Mesh"))
+	# cape: long tattered red-black cloak behind him
+	var cape := _node3d("Cape", Vector3(0, 1.64, 0.18))
+	_tattered(cape, 0.82, 0.85, 1.65, 15, capem, 77, Vector3(0, 0, 0), "CloakOuter")
+	_tattered(cape, 0.76, 0.8, 1.5, 14, capeb, 78, Vector3(0, -0.02, 0.03), "CloakInner")
+	_part(cape, _box(Vector3(0.7, 0.1, 0.12)), coat, Vector3(0, 0.02, -0.01), Vector3.ZERO, Vector3.ONE, "Mantle")
 	model.add_child(cape)
 	# Scythe: right arm + shaft + crescent blade, all under the swing pivot
 	var pivot := Node3D.new()
 	pivot.name = "SwordPivot"
 	pivot.position = Vector3(0.42, 1.4, -0.1)
 	model.add_child(pivot)
-	pivot.add_child(_mesh(_capsule(0.085, 0.5), cloth, Vector3(0, -0.12, -0.05), "Arm"))
-	pivot.add_child(_mesh(_box(Vector3(0.055, 0.055, 2.0)), _mat(Color(0.25, 0.16, 0.1), 0.6), Vector3(0, 0, -0.65), "Shaft"))
+	_part(pivot, _cyl(0.085, 0.07, 0.55), coat, Vector3(0, -0.12, -0.05), Vector3.ZERO, Vector3.ONE, "Arm")
+	_part(pivot, _cyl(0.095, 0.095, 0.1), leather, Vector3(0, -0.28, -0.05), Vector3.ZERO, Vector3.ONE, "Bracer")
+	_part(pivot, _sphere(0.07), maskm, Vector3(0, -0.4, -0.05), Vector3.ZERO, Vector3(1, 1.1, 0.8), "Glove")
+	pivot.add_child(_mesh(_box(Vector3(0.055, 0.055, 2.0)), _mat(Color(0.2, 0.13, 0.09), 0.6), Vector3(0, 0, -0.65), "Shaft"))
 	var bladem := _mat(Color(0.8, 0.82, 0.9), 0.2, 0.95)
 	bladem.emission_enabled = true
 	bladem.emission = Color(0.4, 0.15, 0.7)

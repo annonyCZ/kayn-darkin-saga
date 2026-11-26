@@ -140,7 +140,7 @@ mesh = SubResource("BoxMesh_pe3k2")
 transform = Transform3D(0.90630776, -0.42261827, 0, 0.42261827, 0.90630776, 0, 0, 0, 1, -0.16, 0.2, 0)
 mesh = SubResource("CylinderMesh_kugq1")
 
-[node name="@MeshInstance3D@3" type="MeshInstance3D" parent="Model/Head"]
+[node name="@MeshInstance3D@34" type="MeshInstance3D" parent="Model/Head"]
 transform = Transform3D(0.90630776, 0.42261827, 0, -0.42261827, 0.90630776, 0, 0, 0, 1, 0.16, 0.2, 0)
 mesh = SubResource("CylinderMesh_x3klb")
 
@@ -196,5 +196,5 @@ collision_layer = 0
 collision_mask = 2
 script = ExtResource("4_jt03m")
 
-[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="Model/Hitbox"]
+[node name="@CollisionShape3D@35" type="CollisionShape3D" parent="Model/Hitbox"]
 shape = SubResource("BoxShape3D_e4ejd")

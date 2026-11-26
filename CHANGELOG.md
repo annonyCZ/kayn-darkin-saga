@@ -42,3 +42,7 @@
 - Enterable hall (`village_hall.gd`): walls with collision, door, roof, beams, furniture, banners, brazier fire, hanging lanterns, interior light.
 - HUD restyle: gold-framed segmented health/stamina bars with damage trail (`hud_bar.gd`), bottom-centre ability hotbar with drawn icons, cooldown wipe and ready flash (`ability_slot.gd`); control hint fades after 24 s.
 - Tests updated for the new layout; added hall, valley and goods checks (135 checks).
+
+## 0.7.1 - 2026-11-26
+- Balanced lighting and desaturated village atlas textures (less toy-like).
+- Kayn model rebuilt after the concept art (still procedural primitives, same rig/animations): masked face with red eyes, layered silver hair, high red-lined collar, black coat with straps, belt, chain and pendant, spiked steel pauldron, glowing purple demonic arm with claws, buckled boots, long tattered red cape. Preview tool: `tests/character_view.tscn`.
