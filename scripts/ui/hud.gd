@@ -64,7 +64,7 @@ func _ready() -> void:
 	_target_box.add_child(_target_hp)
 
 	_hint = Label.new()
-	_hint.text = "WASD move  |  Shift sprint  |  Space jump  |  Ctrl dodge  |  LMB light combo  |  RMB heavy  |  F block (tap just before a hit = parry)  |  Q/E abilities  |  Tab lock-on (wheel: switch)  |  Esc pause"
+	_hint.text = "WASD pohyb  |  Shift sprint  |  Mezerník skok  |  Ctrl úhyb  |  LMB lehký útok  |  PMB těžký  |  F blok (těsně před zásahem = odražení)  |  Q/E schopnosti  |  R tykev  |  G interakce  |  Tab zaměření  |  Esc pauza"
 	_hint.position = Vector2(24, 0)
 	_hint.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_hint.position = Vector2(24, -34)
@@ -73,7 +73,7 @@ func _ready() -> void:
 	root.add_child(_hint)
 
 	_death = Label.new()
-	_death.text = "YOU DIED"
+	_death.text = "ZEMŘEL JSI"
 	_death.set_anchors_preset(Control.PRESET_CENTER)
 	_death.position = Vector2(-120, -30)
 	_death.add_theme_font_size_override("font_size", 56)
@@ -88,13 +88,15 @@ func _ready() -> void:
 	ab.offset_bottom = -44
 	ab.add_theme_constant_override("separation", 16)
 	root.add_child(ab)
-	for key: String in ["dashslash", "slam"]:
+	for key: String in ["gourd", "dashslash", "slam"]:
 		var col := VBoxContainer.new()
 		col.add_theme_constant_override("separation", 4)
-		var slot := AbilitySlot.new("Q" if key == "dashslash" else "E", "dash" if key == "dashslash" else "slam")
+		var slot := AbilitySlot.new({"gourd": "R", "dashslash": "Q", "slam": "E"}[key], {"gourd": "gourd", "dashslash": "dash", "slam": "slam"}[key])
+		if key == "gourd":
+			slot.count = 3
 		col.add_child(slot)
 		var lbl := Label.new()
-		lbl.text = Player.ABILITY_NAMES[key]
+		lbl.text = "Léčivá tykev" if key == "gourd" else {"dashslash": "Krok stínu", "slam": "Úder do země"}[key]
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl.add_theme_font_size_override("font_size", 14)
 		lbl.modulate = Color(1, 1, 1, 0.75)
@@ -103,7 +105,7 @@ func _ready() -> void:
 		_slots[key] = slot
 
 	_mouse_hint = Label.new()
-	_mouse_hint.text = "Paused - click to resume"
+	_mouse_hint.text = "Pozastaveno - kliknutím pokračuj"
 	_mouse_hint.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_mouse_hint.position = Vector2(-90, 60)
 	_mouse_hint.add_theme_font_size_override("font_size", 20)
@@ -126,7 +128,12 @@ func _process(_delta: float) -> void:
 	_st.value = _player.stamina / _player.max_stamina
 	_path_label.text = String(_player.profile["name"])
 	for key: String in _slots:
-		(_slots[key] as AbilitySlot).set_cooldown(_player.cooldown_fraction(key))
+		if key == "gourd":
+			var gs := _slots[key] as AbilitySlot
+			gs.count = _player.gourd_charges
+			gs.set_cooldown(1.0 if _player.gourd_charges == 0 else 0.0)
+		else:
+			(_slots[key] as AbilitySlot).set_cooldown(_player.cooldown_fraction(key))
 	_hint_age += get_process_delta_time()
 	_hint.modulate.a = 0.7 * clampf((24.0 - _hint_age) / 4.0, 0.0, 1.0)
 	_death.visible = _player.state == Player.State.DEAD

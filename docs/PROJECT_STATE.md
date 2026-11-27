@@ -2,7 +2,7 @@
 
 **Engine:** Godot 4.5 (verified headless). Original project targeted 4.7; `config/features` set to 4.5 so it opens in 4.5+.
 
-## Done and verified (135 automated checks pass)
+## Done and verified (147 automated checks pass)
 - Phase 0: project initialised, folder structure, git, docs.
 - Milestone 1 playable prototype: third-person over-the-shoulder camera (collision, lock-on framing, shake),
   camera-relative movement (run/sprint/jump), stamina, dodge with i-frames, 3-hit light combo + heavy with

@@ -120,6 +120,14 @@ static func _make(n: String) -> AudioStreamWAV:
 				var t := float(i) / RATE
 				y += 0.12 * (rng.randf_range(-1.0, 1.0) - y)
 				out[i] = (sin(TAU * 95.0 * t) * 0.6 + y * 1.4) * exp(-t * 22.0)
+		"heal":
+			var len := int(RATE * 0.9)
+			out.resize(len)
+			var ph := 0.0
+			for i in len:
+				var t := float(i) / RATE
+				ph += TAU * (260.0 + 260.0 * t + 40.0 * sin(t * 30.0)) / RATE
+				out[i] = sin(ph) * 0.35 * minf(t * 12.0, 1.0) * exp(-t * 2.2) + sin(ph * 2.0) * 0.1 * exp(-t * 3.0)
 		"ui_move":
 			var len := int(RATE * 0.09)
 			out.resize(len)

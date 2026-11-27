@@ -23,7 +23,7 @@ func _ready() -> void:
 	_cards.grow_vertical = Control.GROW_DIRECTION_BOTH
 	add_child(_cards)
 	var title := Label.new()
-	title.text = "Kayn's Choice - this decision is permanent for this save"
+	title.text = "Kaynova volba - toto rozhodnutí je v tomto uložení trvalé"
 	title.add_theme_font_size_override("font_size", 28)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_cards.add_child(title)
@@ -46,9 +46,9 @@ func _ready() -> void:
 	var hb := HBoxContainer.new()
 	hb.alignment = BoxContainer.ALIGNMENT_CENTER
 	cv.add_child(hb)
-	var yes := Button.new(); yes.name = "ConfirmButton"; yes.text = "Confirm (cannot be undone)"
+	var yes := Button.new(); yes.name = "ConfirmButton"; yes.text = "Potvrdit (nelze vrátit)"
 	yes.pressed.connect(confirm)
-	var no := Button.new(); no.name = "BackButton"; no.text = "Go back"
+	var no := Button.new(); no.name = "BackButton"; no.text = "Zpět"
 	no.pressed.connect(cancel)
 	hb.add_child(yes)
 	hb.add_child(no)
@@ -83,7 +83,7 @@ func _card(p: int) -> Control:
 	v.add_child(q)
 	var b := Button.new()
 	b.name = "Choose%d" % p
-	b.text = "Become " + String(prof["name"])
+	b.text = "Stát se: " + String(prof["name"])
 	b.pressed.connect(select.bind(p))
 	v.add_child(b)
 	return panel
@@ -91,7 +91,7 @@ func _card(p: int) -> Control:
 ## Step 1: pick a path (shows the confirmation prompt).
 func select(p: int) -> void:
 	_pick = p
-	_confirm_label.text = "Become %s?\nYou cannot switch to the other path in this campaign." % KaynPaths.profile(p)["name"]
+	_confirm_label.text = "Stát se: %s?\nNa druhou cestu už v této kampani nepřejdeš." % KaynPaths.profile(p)["name"]
 	_cards.visible = false
 	_confirm.visible = true
 

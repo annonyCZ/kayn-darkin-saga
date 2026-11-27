@@ -34,6 +34,7 @@ var light_count: int = 0
 var house_count: int = 0
 var pavilion: ChinesePavilion
 var hall: VillageHall
+var elder: VillageElder
 var _stalls: Array[Node3D] = []
 var _rng := RandomNumberGenerator.new()
 
@@ -125,6 +126,12 @@ func _plaza() -> void:
 	hall.rotation.y = deg_to_rad(-90.0)
 	add_child(hall)
 	hall.set_meta("carve_radius", 7.0)
+	# Elder Lin stands on the plaza, a few steps from the pavilion
+	elder = VillageElder.new()
+	elder.name = "Elder"
+	elder.position = Vector3(5.5, _ground(5.5, PLAZA_Z + 5.0), PLAZA_Z + 5.0)
+	add_child(elder)
+	elder.set_meta("carve_radius", 1.6)
 
 func _trees_and_clutter() -> void:
 	# tea house on the west side of the plaza (door faces the pavilion), guardian lions at the gate

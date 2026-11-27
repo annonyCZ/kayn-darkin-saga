@@ -16,7 +16,7 @@ func _process(_delta: float) -> void:
 	var gs := get_node_or_null("/root/GameState")
 	var locked: bool = gs != null and bool(gs.path_locked)
 	_prompt.visible = _player_inside and not locked and _open == null
-	_prompt.text = "[G] Kneel at the altar - choose Kayn's path"
+	_prompt.text = "[G] Poklekni k oltáři - vyber Kaynovu cestu"
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):

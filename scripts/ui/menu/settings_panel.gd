@@ -8,7 +8,7 @@ const BIND_ACTIONS: Array = [
 	["move_right", "Pohyb vpravo"], ["sprint", "Sprint"], ["jump", "Skok"], ["dodge", "Úhyb"],
 	["light_attack", "Lehký útok"], ["heavy_attack", "Těžký útok"], ["block", "Blok"],
 	["ability_1", "Schopnost 1"], ["ability_2", "Schopnost 2"], ["lock_on", "Zaměřit cíl"],
-	["interact", "Interakce"],
+	["interact", "Interakce"], ["heal", "Léčivá tykev"],
 ]
 const SCALES: Array[float] = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 

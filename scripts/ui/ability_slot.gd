@@ -4,6 +4,7 @@ extends Control
 
 var key_text: String = "Q"
 var icon_kind: String = "dash"
+var count: int = -1   # charges drawn in the corner when >= 0
 var cooldown: float = 0.0   ## remaining fraction 0..1 (0 = ready)
 var _flash: float = 0.0
 var _was_cooling: bool = false
@@ -45,6 +46,12 @@ func _draw() -> void:
 			draw_colored_polygon(PackedVector2Array([Vector2(c.x - 10, c.y), Vector2(c.x + 10, c.y), Vector2(c.x, c.y + 14)]), ready_col)
 			draw_arc(Vector2(c.x, c.y + 14), 18.0, PI * 1.1, PI * 1.9, 16, ready_col, 2.5, true)
 			draw_arc(Vector2(c.x, c.y + 14), 26.0, PI * 1.15, PI * 1.85, 16, Color(ready_col, 0.55), 2.0, true)
+		"gourd":
+			var gc := Color(0.78, 0.62, 0.32) if count != 0 else Color(0.4, 0.36, 0.3)
+			draw_circle(Vector2(c.x, c.y + 6), 13.0, gc)
+			draw_circle(Vector2(c.x, c.y - 9), 8.0, gc)
+			draw_rect(Rect2(c.x - 3, c.y - 21, 6, 6), Color(0.3, 0.16, 0.1))
+			draw_line(Vector2(c.x - 8, c.y + 2), Vector2(c.x + 8, c.y + 2), Color(0.5, 0.08, 0.1), 3.0)
 	if cooldown > 0.0:
 		var pts := PackedVector2Array([c])
 		var a0 := -PI * 0.5
@@ -61,6 +68,8 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, s), Color(1, 0.95, 0.8, 0.45 * _flash))
 	draw_rect(Rect2(Vector2.ZERO, s), gold, false, 2.0)
 	draw_rect(Rect2(Vector2(5, 5), s - Vector2(10, 10)), Color(gold, 0.25), false, 1.0)
+	if count >= 0:
+		draw_string(MenuTheme.title_font(), Vector2(s.x - 20, 22), str(count), HORIZONTAL_ALIGNMENT_RIGHT, 16, 18, Color(0.95, 0.85, 0.55))
 	# key cap
 	var f := MenuTheme.title_font()
 	var cap := Rect2(Vector2(s.x * 0.5 - 13, s.y - 11), Vector2(26, 22))

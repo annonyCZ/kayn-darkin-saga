@@ -15,12 +15,12 @@ func _ready() -> void:
 	var v := VBoxContainer.new()
 	v.custom_minimum_size = Vector2(260, 0)
 	_panel.add_child(v)
-	var t := Label.new(); t.text = "PAUSED"; t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var t := Label.new(); t.text = "POZASTAVENO"; t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	t.add_theme_font_size_override("font_size", 32)
 	v.add_child(t)
-	var r := Button.new(); r.text = "Resume"; r.pressed.connect(toggle); v.add_child(r)
-	var mm := Button.new(); mm.text = "Main menu"; mm.pressed.connect(_to_main_menu); v.add_child(mm)
-	var q := Button.new(); q.text = "Quit game"; q.pressed.connect(func() -> void: get_tree().quit()); v.add_child(q)
+	var r := Button.new(); r.text = "Pokračovat"; r.pressed.connect(toggle); v.add_child(r)
+	var mm := Button.new(); mm.text = "Hlavní menu"; mm.pressed.connect(_to_main_menu); v.add_child(mm)
+	var q := Button.new(); q.text = "Ukončit hru"; q.pressed.connect(func() -> void: get_tree().quit()); v.add_child(q)
 	add_child(_panel)
 
 ## Back to the main menu (progress is already saved by GameState on every change).

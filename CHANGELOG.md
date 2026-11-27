@@ -52,3 +52,9 @@
 - Forest rebuilt on pack models: two pine silhouettes, dead twisted trees, bare birches, boulders, sandstone, black basalt columns, small stones and glow mushrooms, with colliders (`forest.gd`).
 - Village: tea house at the plaza, guardian lions at the gate, lantern post, rice jars.
 - Grass: lighter roots + cheap translucency so backlit grass is no longer black.
+
+## 0.9.0 - 2026-11-27
+- Healing gourd (R / pad Back): 3 charges, heals 45% over 1 s, only usable in locomotion and below full health; refilled on respawn and by the elder. HUD slot with charge count, rebindable in settings.
+- Elder Lin (`village_elder.gd`) on the plaza with a Czech dialogue (`dialogue_box.gd`, G to advance); finishing it refills the gourd.
+- Czech text for HUD hints, death/pause screens, altar prompt, path-choice screen and path profiles.
+- Tests: 147 checks (gourd, elder, dialogue).

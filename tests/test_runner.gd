@@ -566,6 +566,33 @@ func _village_tests() -> void:
 	check(v.get_node_or_null("shop_tea") != null and v.get_node_or_null("stone_lion") != null, "tea house and gate lions from the town pack are placed")
 	var forest := main.get_node_or_null("TestArena/Forest")
 	check(forest != null and forest.get_node_or_null("Pines") != null and forest.get_node_or_null("Basalt") != null, "forest uses pack pines and basalt formations")
+	check(v.elder != null, "village elder exists")
+	if v.elder != null:
+		v.elder._player_inside = true
+		check(v.elder.talk(), "elder starts a dialogue")
+		var box := get_tree().root.get_children().filter(func(n: Node) -> bool: return n is DialogueBox)
+		check(box.size() == 1, "dialogue box is open")
+		player.gourd_charges = 0
+		for i in VillageElder.LINES.size():
+			(box[0] as DialogueBox).advance()
+		await frames(2)
+		check(not is_instance_valid(box[0]) or (box[0] as Node).is_queued_for_deletion(), "dialogue closes after the last line")
+		check(player.gourd_charges == player.gourd_max, "elder refills the healing gourd")
+		v.elder._player_inside = false
+	# healing gourd
+	player.health.health = player.health.max_health * 0.3
+	player.gourd_charges = 3
+	check(player.use_gourd() and player.gourd_charges == 2, "gourd drink spends a charge")
+	check(not player.use_gourd(), "cannot drink twice at once")
+	await get_tree().create_timer(1.3).timeout
+	check(player.health.fraction() > 0.7, "gourd heals ~45%% over a second (%.2f)" % player.health.fraction())
+	player.health.health = player.health.max_health
+	check(not player.use_gourd() and player.gourd_charges == 2, "gourd is not wasted at full health")
+	player.health.health = player.health.max_health * 0.5
+	player.gourd_charges = 0
+	check(not player.use_gourd(), "empty gourd does nothing")
+	player.health.health = player.health.max_health
+	player.refill_gourd()
 	check(v.house_count >= 6, "village has %d houses" % v.house_count)
 	var space: PhysicsDirectSpaceState3D = main.get_world_3d().direct_space_state
 	# A ray from the side hits the house (solid), a ray through the gate opening does not.

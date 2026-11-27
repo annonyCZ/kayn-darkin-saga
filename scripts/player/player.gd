@@ -47,6 +47,12 @@ var max_stamina: float = 100.0
 var lock_target: Node3D = null
 var spawn_point: Vector3
 var respawn_time: float = 2.5
+## Healing gourd: limited charges, restored on respawn and by the village elder.
+var gourd_max: int = 3
+var gourd_charges: int = 3
+var drinking: float = 0.0
+const GOURD_HEAL := 0.45     # fraction of max health restored per drink
+const GOURD_TIME := 1.0
 
 var _stamina_delay: float = 0.0
 var _attack_name: String = ""
@@ -160,6 +166,9 @@ func _physics_process(delta: float) -> void:
 	is_sprinting = false
 	_combo_timer += delta
 	_update_stamina(delta)
+	if drinking > 0.0:
+		drinking = maxf(0.0, drinking - delta)
+		health.heal(health.max_health * GOURD_HEAL * delta / GOURD_TIME)
 	for k: String in _cooldowns:
 		_cooldowns[k] = maxf(0.0, _cooldowns[k] - delta)
 	if lock_target != null and (not is_instance_valid(lock_target) or _target_dead(lock_target) \
@@ -214,6 +223,8 @@ func _locomotion(delta: float) -> void:
 
 	if Input.is_action_just_pressed("dodge") and is_on_floor():
 		_start_dodge(dir)
+	elif Input.is_action_just_pressed("heal"):
+		use_gourd()
 	elif Input.is_action_just_pressed("ability_1"):
 		_try_ability("dashslash")
 	elif Input.is_action_just_pressed("ability_2"):
@@ -304,6 +315,19 @@ func _next_light() -> String:
 
 func cooldown_left(ability: String) -> float:
 	return _cooldowns.get(ability, 0.0)
+
+## Drink from the gourd: spends a charge, then heals over GOURD_TIME. False when it cannot be used.
+func use_gourd() -> bool:
+	if state != State.LOCOMOTION or gourd_charges <= 0 or drinking > 0.0 or health.dead \
+			or health.fraction() >= 0.999:
+		return false
+	gourd_charges -= 1
+	drinking = GOURD_TIME
+	Sfx.play("heal", global_position, -2.0)
+	return true
+
+func refill_gourd() -> void:
+	gourd_charges = gourd_max
 
 func cooldown_fraction(ability: String) -> float:
 	return cooldown_left(ability) / float(_cd_max[ability])
@@ -528,6 +552,8 @@ func respawn() -> void:
 	health.invulnerable = false
 	health.changed.emit()
 	stamina = max_stamina
+	gourd_charges = gourd_max
+	drinking = 0.0
 	model.rotation_degrees.x = 0.0
 	_end_pose()
 	_set_state(State.LOCOMOTION)

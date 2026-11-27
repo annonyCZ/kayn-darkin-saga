@@ -199,6 +199,7 @@ func _register_defaults() -> void:
 		"target_next": [_mouse(MOUSE_BUTTON_WHEEL_DOWN), _pad_btn(JOY_BUTTON_DPAD_RIGHT)],
 		"target_prev": [_mouse(MOUSE_BUTTON_WHEEL_UP), _pad_btn(JOY_BUTTON_DPAD_LEFT)],
 		"interact": [_key(KEY_G), _pad_btn(JOY_BUTTON_DPAD_UP)],
+		"heal": [_key(KEY_R), _pad_btn(JOY_BUTTON_BACK)],
 		"pause": [_key(KEY_ESCAPE), _pad_btn(JOY_BUTTON_START)],
 	}
 	for action: String in _defaults:
